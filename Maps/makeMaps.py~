@@ -1,0 +1,125 @@
+class Hex3Coord:
+    
+    def __init__(self, x, y, z):
+        self.x = x
+        self.y = y
+        self.z = z
+
+
+    def __add__(self, other):
+        nx = self.x + other.x
+        ny = self.y + other.y
+        nz = self.z + other.z
+
+        return Hex3Coord(nx, ny, nz)
+
+    def __str__(self):
+        return "[{0} {1} {2}]".format(self.x, self.y, self.z)
+
+NW = Hex3Coord(0, 1, -1)
+NE = Hex3Coord(1, 0, -1)
+E = Hex3Coord(1, -1, 0)
+SE = Hex3Coord(0, -1, 1)
+SW = Hex3Coord(-1, 0, 1)
+W = Hex3Coord(-1, 1, 0)
+
+def makeTile(coord, outFile, tileType):
+    outFile.write("    {0}({1}, {2}, {3});\n".format(tileType, coord.x, coord.y, coord.z))
+
+def makeObject(coord, outFile, objType):
+    outFile.write("    {0}({1}, {2}, {3});\n".format(objType, coord.x, coord.y, coord.z))
+
+def makeMountain(coord, outFile):
+    makeTile(coord, outFile, 'Mountain')
+
+def makePlain(coord, outFile):
+    makeTile(coord, outFile, 'Plain')
+
+def makeCity(coord, outFile):
+    makeTile(coord, outFile, 'City')
+
+def makeWater(coord, outFile):
+    makeTile(coord, outFile, 'Water')
+
+def makeWaterMount(coord, outFile):
+    makeTile(coord, outFile, 'WaterMount')
+
+def makePortal(coord, outFile):
+    makeTile(coord, outFile, 'Portal')
+
+def makeTree(coord, outFile):
+    makeTile(coord, outFile, 'Plain')
+    makeObject(coord, outFile, 'Tree')
+    
+tileMap = {
+    'A': makeMountain,
+    '.': makePlain,
+    '*': makeCity,
+    '~': makeWater,
+    '^': makeWaterMount,
+    'O': makePortal,
+    't': makeTree,
+    }
+
+def writeHeader(episodeNum, f):
+    f.write("// This file was auto-generated\n\n")
+
+    f.write("using MicroTwenty;\n\n")
+
+    className = "Episode%dMap" % episodeNum
+
+    f.write("class %s : HexMap {\n" % className)
+    f.write("  public %s () : base() {\n" % className)
+    f.write("    LayoutMap();\n")
+    f.write("  }\n\n")
+    f.write("  public override void LayoutMap() {\n");
+
+def writeFooter(f):
+    f.write("  }\n")
+    f.write("}\n\n")
+    f.write("// This file was auto-generated\n\n")
+    
+def compileMap(inFileName, outFileName):
+    print("Episode", inFileName)
+    pageStart = Hex3Coord(-1, 9, -8)
+    with open(inFileName) as inFile:
+        episodeNum = int(inFileName[3])
+        with open(outFileName, "wt") as outFile:
+            writeHeader(episodeNum, outFile)
+            lineStart = pageStart
+            for lineNum, line in enumerate(inFile.readlines()):
+                line = line.strip()
+                if not line:
+                    break
+                #print ("line #", lineNum)
+                curPos = lineStart
+                for cn, c in enumerate(line):
+                    if c == ' ':
+                        continue
+                    colNum = cn // 2
+                    #print (lineNum, colNum, curPos, c)
+                    if c in tileMap:
+                        tileMap[c](curPos, outFile)
+                    else:
+                        print ("bad char:", c)
+                    curPos = curPos + E
+
+                if lineNum % 2 == 0:
+                    lineStart = lineStart + SW
+                else:
+                    lineStart = lineStart + SE
+                outFile.write("\n");
+            writeFooter(outFile)
+    
+filenames = ["ep_1.txt",
+             "ep_2.txt",
+             "ep_3.txt",
+             "ep_4.txt",
+             "ep_5.txt",
+             "ep_6.txt"]
+
+for fn in filenames:
+    outfn = fn[:-3] + "cs"
+    compileMap(fn, outfn)
+
+             

@@ -1,0 +1,6 @@
+from PIL import Image
+
+
+im = Image.new('RGBA', (256, 256))
+
+im.save("a2font.png")
