@@ -26,3 +26,12 @@ Near term TODO
   - at least one sprite sheet for monsters (one per episode?)
   - city tiles?
   - dungeon tiles?
+
+Longer Term TODO
+- stores in town
+  - pub
+  - garth's weapon shop
+  - armor
+  - Le Healerie
+  - magic items
+- Portfolio Search w/ MCTS for combat AI

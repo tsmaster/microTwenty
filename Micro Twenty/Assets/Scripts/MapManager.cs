@@ -150,11 +150,16 @@ namespace MicroTwenty
             // dynamic objects handled by combatMgr
         }
 
+        internal List<HexTile> GetTiles ()
+        {
+            return GetHexMap ().GetTiles ();
+        }
+
         public List<DynamicObject> GetDynamicObjectsAt (HexCoord hc)
         {
             var outList = new List<DynamicObject> ();
             foreach (var dynObj in dynamicObjects) {
-                if (dynObj.hexCoord.SamePos (hc)) {
+                if (dynObj.hexCoord.Equals(hc)) {
                     outList.Add (dynObj);
                 }
             }
@@ -295,7 +300,7 @@ namespace MicroTwenty
             }
 
             foreach (var dynObj in GetHexMap ().dynamicObjects) {
-                if (dynObj.hexCoord.SamePos (newPos)) {
+                if (dynObj.hexCoord.Equals(newPos)) {
                     if (dynObj.blocksMovement) {
                         return;
                     }
@@ -306,7 +311,7 @@ namespace MicroTwenty
             Debug.LogFormat ("Moved to {0}", playerPos.ToString());
 
             foreach (var dynObj in GetHexMap ().dynamicObjects) {
-                if (dynObj.hexCoord.SamePos (newPos)) {
+                if (dynObj.hexCoord.Equals(newPos)) {
                     dynObj.OnMoveOver ();
                 }
             }

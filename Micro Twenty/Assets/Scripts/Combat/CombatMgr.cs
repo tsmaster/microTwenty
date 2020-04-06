@@ -115,6 +115,18 @@ namespace MicroTwenty
             }
         }
 
+        private Dictionary<HexCoord, bool> MakeWalkableDict ()
+        {
+            var outDict = new Dictionary<HexCoord, bool> ();
+
+            foreach (var hexTile in _mapManager.GetTiles()) {
+                var hc = hexTile.HexCoord;
+                outDict [hc] = IsLocationWalkable (hc);
+            }
+
+            return outDict;
+        }
+
         private bool IsLocationWalkable (HexCoord hc)
         {
             foreach (var hexTile in _mapManager.GetTilesAt (hc)) {
@@ -130,7 +142,7 @@ namespace MicroTwenty
             }
 
             foreach (var combatUnit in units) {
-                if (combatUnit.GetHexCoord ().SamePos (hc)) {
+                if (combatUnit.GetHexCoord ().Equals(hc)) {
                     // TODO make use of dynamic objects features instead?
                     return false;
                 }

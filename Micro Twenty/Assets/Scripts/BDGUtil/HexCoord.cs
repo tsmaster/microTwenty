@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace MicroTwenty
 {
-    public class HexCoord
+    public class HexCoord : IEqualityComparer<HexCoord>
     {
-        public int x, y, z;
+        public readonly int x, y, z;
 
         public HexCoord (int x, int y, int z)
         {
@@ -36,13 +36,6 @@ namespace MicroTwenty
                 this.x * count,
                 this.y * count,
                 this.z * count);
-        }
-
-        public bool SamePos (HexCoord other)
-        {
-            return ((this.x == other.x) &&
-                (this.y == other.y) &&
-                (this.z == other.z));
         }
 
         public override string ToString ()
@@ -122,6 +115,34 @@ namespace MicroTwenty
                 outList.Add (hc.Add (startCoord));
             }
             return outList;
+        }
+
+        public bool Equals (HexCoord a, HexCoord b)
+        {
+            UnityEngine.Debug.LogFormat ("(2) testing {0} == {1}", a.ToString (), b.ToString ());
+
+            return a == b;
+        }
+
+        public int GetHashCode (HexCoord obj)
+        {
+            return obj.GetHashCode ();
+        }
+
+        public override int GetHashCode ()
+        {
+            return 17 * x + 11 * y + z;
+        }
+
+        public override bool Equals (object other)
+        {
+            var otherHc = other as HexCoord;
+            if (otherHc == null) {
+                return false;
+            }
+            return ((this.x == otherHc.x) &&
+                (this.y == otherHc.y) &&
+                (this.z == otherHc.z));
         }
     }
 }

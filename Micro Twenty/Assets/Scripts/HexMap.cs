@@ -115,15 +115,20 @@ namespace MicroTwenty
             dynamicObjects.Add (new DynamicObject (gameMgr, new HexCoord (x, y, z), objectType, blocksMovement));
         }
 
-        internal List<HexTile> GetTilesAt (HexCoord hc)
+        public List<HexTile> GetTilesAt (HexCoord hc)
         {
             var outList = new List<HexTile> ();
             foreach (var tile in tiles) {
-                if (tile.HexCoord.SamePos (hc)) {
+                if (tile.HexCoord.Equals(hc)) {
                     outList.Add (tile);
                 }
             }
             return outList;
+        }
+
+        public List<HexTile> GetTiles ()
+        {
+            return tiles;
         }
     }
 }
