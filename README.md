@@ -1,6 +1,8 @@
 # microTwenty
 A content-minimal, but feature-rich Computer Role Playing Game in the world of The Twenty
 
+WIP "playable" at http://bigdicegames.com/TheTwenty/MicroTwenty/index.html
+
 Current features
 - walking around an "overland" map of 6 separate "episode" regions
 - transport from episode to episode
