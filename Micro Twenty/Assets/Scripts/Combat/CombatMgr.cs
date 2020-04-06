@@ -101,12 +101,42 @@ namespace MicroTwenty
             var startCoord = combatant.GetHexCoord ();
             //UnityEngine.Debug.LogFormat ("start coord {0} {1} {2}", startCoord.x, startCoord.y, startCoord.z);
 
-            var locs = HexCoord.GetAtRange (1);
-            var locIndex = UnityEngine.Random.Range (0, locs.Count);
-            var destCoord = locs[locIndex].Add(startCoord);
-            //UnityEngine.Debug.LogFormat ("end coord {0} {1} {2}", destCoord.x, destCoord.y, destCoord.z);
+            var locs = HexCoord.GetAtRangeFromLoc (1, startCoord).FindAll (IsLocationWalkable);
 
-            _currentOrder = new CombatMoveOrder (_mapManager, _mapManager.GetHexMap(), destCoord, combatant);
+            UnityEngine.Debug.LogFormat ("found {0} locations", locs.Count);
+
+            if (locs.Count == 0) {
+                _currentOrder = new PassOrder (combatant);
+                return;
+            } else {
+                var locIndex = UnityEngine.Random.Range (0, locs.Count);
+                var destCoord = locs [locIndex];
+                _currentOrder = new CombatMoveOrder (_mapManager, _mapManager.GetHexMap (), destCoord, combatant);
+            }
+        }
+
+        private bool IsLocationWalkable (HexCoord hc)
+        {
+            foreach (var hexTile in _mapManager.GetTilesAt (hc)) {
+                if (!hexTile.CanMove) {
+                    return false;
+                }
+            }
+
+            foreach (var dynObj in _mapManager.GetDynamicObjectsAt (hc)) {
+                if (dynObj.blocksMovement) {
+                    return false;
+                }
+            }
+
+            foreach (var combatUnit in units) {
+                if (combatUnit.GetHexCoord ().SamePos (hc)) {
+                    // TODO make use of dynamic objects features instead?
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

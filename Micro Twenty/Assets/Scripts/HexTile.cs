@@ -4,6 +4,8 @@ namespace MicroTwenty
     public class HexTile
     {
         private bool canMove;
+        public HexCoord HexCoord;
+
         public bool CanMove {
             get { return canMove; }
             set { canMove = value; }
@@ -22,6 +24,7 @@ namespace MicroTwenty
             this.x = x;
             this.y = y;
             this.z = z;
+            this.HexCoord = new HexCoord (x, y, z);
             this.canMove = canMove;
         }
     }

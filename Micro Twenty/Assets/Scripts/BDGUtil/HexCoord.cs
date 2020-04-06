@@ -114,5 +114,14 @@ namespace MicroTwenty
             }
             return outList;
         }
+
+        internal static List<HexCoord> GetAtRangeFromLoc (int v, HexCoord startCoord)
+        {
+            List<HexCoord> outList = new List<HexCoord> ();
+            foreach (var hc in GetAtRange (v)) {
+                outList.Add (hc.Add (startCoord));
+            }
+            return outList;
+        }
     }
 }

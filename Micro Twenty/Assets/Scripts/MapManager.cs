@@ -150,6 +150,22 @@ namespace MicroTwenty
             // dynamic objects handled by combatMgr
         }
 
+        public List<DynamicObject> GetDynamicObjectsAt (HexCoord hc)
+        {
+            var outList = new List<DynamicObject> ();
+            foreach (var dynObj in dynamicObjects) {
+                if (dynObj.hexCoord.SamePos (hc)) {
+                    outList.Add (dynObj);
+                }
+            }
+            return outList;
+        }
+
+        public List<HexTile> GetTilesAt (HexCoord hc)
+        {
+            return GetHexMap ().GetTilesAt (hc);
+        }
+
         private int GetMapByName (string destMapName)
         {
             int foundMapIndex = -1;
