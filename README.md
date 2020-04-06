@@ -10,10 +10,10 @@ Current features
 - hex grid movement, controlled by WEADZX
 - beginnings of a combat mode, with colored sprites "jumping" from tile to tile
 - units move in initiative order
+- made combat movement smarter by not moving into occupied tiles (including both other sprites as well as static tiles that block movement)
+- added "pass" action that does nothing and is immediately complete
 
 Near term TODO
-- make combat movement smarter by not moving into occupied tiles (including both other sprites as well as static tiles that block movement)
-- add "pass" action that does nothing and is immediately complete
 - add A* pathfinding for longer moves
 - add actual attack actions
 - display Hit Points above sprites
