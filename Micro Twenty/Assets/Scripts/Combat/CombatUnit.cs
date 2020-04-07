@@ -54,5 +54,10 @@ namespace MicroTwenty
         {
             return teamIndex;
         }
+
+        public bool IsAlive ()
+        {
+            return currentHP > 0;
+        }
     }
 }

@@ -144,5 +144,12 @@ namespace MicroTwenty
                 (this.y == otherHc.y) &&
                 (this.z == otherHc.z));
         }
+
+        internal int DistanceTo (HexCoord destCoord)
+        {
+            return (Math.Abs (this.x - destCoord.x) +
+                Math.Abs (this.y - destCoord.y) +
+                Math.Abs (this.z - destCoord.z)) / 2;
+        }
     }
 }
