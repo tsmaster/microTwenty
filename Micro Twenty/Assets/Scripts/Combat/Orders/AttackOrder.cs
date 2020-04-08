@@ -6,18 +6,26 @@ namespace MicroTwenty
     {
         private CombatUnit _combatant;
         private CombatUnit _target;
-        private bool _isDone;
+        private readonly MapManager _mapMgr;
+        private float _elapsedTime;
+        private const float DISPLAY_TIME = 0.314f;
 
-        public AttackOrder (CombatUnit combatant, CombatUnit target)
+        public AttackOrder (MapManager mapMgr, CombatUnit combatant, CombatUnit target)
         {
             _combatant = combatant;
             _target = target;
-            _isDone = false;
+            _mapMgr = mapMgr;
+
+            _elapsedTime = 0.0f;
+
+            _target.currentHP -= 1;
+            UnityEngine.Debug.LogFormat ("{0} hits {1}, new HP {2}/{3}", _combatant.unitName, _target.unitName, _target.currentHP, _target.maxHP);
         }
 
         public void Draw ()
         {
-            // do nothing
+            _mapMgr.DrawTintedSpriteAtLocation (_combatant.GetSpriteId (), _combatant.GetHexCoord(), TeamColorUtil.GetColorForTeam (_combatant.GetTeamID ()));
+            _mapMgr.DrawTintedSpriteAtLocation (SpriteId.SPRITE_TILE_CURSOR, _target.GetHexCoord (), UnityEngine.Color.yellow);
         }
 
         public CombatUnit GetCombatUnit ()
@@ -27,14 +35,17 @@ namespace MicroTwenty
 
         public bool IsDone ()
         {
-            return _isDone;
+            var dt = DISPLAY_TIME;
+            if (UnityEngine.Input.GetKey (UnityEngine.KeyCode.LeftShift)) {
+                dt = 0.09f;
+            }
+
+            return _elapsedTime >= dt;
         }
 
         public void Update (float deltaSeconds)
         {
-            _target.currentHP -= 1;
-            UnityEngine.Debug.LogFormat ("{0} hits {1}, new HP {2}/{3}", _combatant.unitName, _target.unitName, _target.currentHP, _target.maxHP);
-            _isDone = true;
+            _elapsedTime += deltaSeconds;
         }
     }
 }

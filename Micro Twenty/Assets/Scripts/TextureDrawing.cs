@@ -10,6 +10,31 @@ namespace MicroTwenty
             int width, int height,
             Color fillColor, Color strokeColor, bool fill, bool stroke)
         {
+            if (left < 0) {
+                width += left;
+                left = 0;
+            }
+            if (left + width >= targetTexture.width) {
+                width = targetTexture.width - left - 1;
+            }
+
+            if (width <= 0) {
+                return;
+            }
+
+            if (top < 0) {
+                height += top;
+                top = 0;
+            }
+            if (top + height >= targetTexture.height) {
+                height = targetTexture.height - top - 1;
+            }
+
+            if (height <= 0) {
+                return;
+            }
+
+
             var texWidth = targetTexture.width;
             var texHeight = targetTexture.height;
 

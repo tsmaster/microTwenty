@@ -13,12 +13,15 @@ namespace MicroTwenty
 
         private bool _inCombat = false;
         private int _movingUnit;
+        private bool _isDone;
 
         public bool InCombat {
             get { return _inCombat; }
             set {
                 _inCombat = value;
-                Initialize ();
+                if (_inCombat) {
+                    Initialize ();
+                }
             }
         }
 
@@ -38,20 +41,50 @@ namespace MicroTwenty
         public void Initialize ()
         {
             units.Clear ();
-            AddUnit ("Stan", new HexCoord (0, 0, 0), SpriteId.SPRITE_COMBAT_GUY_1, 0);
-            AddUnit ("Kim", new HexCoord (1, 0, -1), SpriteId.SPRITE_COMBAT_GUY_2, 0);
-            AddUnit ("Flexo", new HexCoord (-1, 1, 0), SpriteId.SPRITE_COMBAT_GUY_3, 0);
-            AddUnit ("Mags", new HexCoord (0, -1, 1), SpriteId.SPRITE_COMBAT_GUY_4, 0);
-            AddUnit ("Torso", new HexCoord (1, -1, 0), SpriteId.SPRITE_COMBAT_GUY_5, 0);
-            AddUnit ("Belto", new HexCoord (0, 1, -1), SpriteId.SPRITE_COMBAT_GUY_6, 0);
+            _currentOrder = null;
 
-            AddUnit ("Snake", new HexCoord (3, 0, -3), SpriteId.SPRITE_COMBAT_SNAKE, 1);
-            AddUnit ("Dog", new HexCoord (4, 0, -4), SpriteId.SPRITE_COMBAT_DOG, 1);
-            AddUnit ("Ratman", new HexCoord (2, 1, -3), SpriteId.SPRITE_COMBAT_RAT_MAN, 1);
-            AddUnit ("Crab", new HexCoord (3, -1, -2), SpriteId.SPRITE_COMBAT_CRAB, 1);
-            AddUnit ("Ghost", new HexCoord (4, -1, -3), SpriteId.SPRITE_COMBAT_GHOST, 1);
-            AddUnit ("Djinn", new HexCoord (3, 1, -4), SpriteId.SPRITE_COMBAT_DJINN, 1);
-            AddUnit ("Cat", new HexCoord (2, 0, -2), SpriteId.SPRITE_COMBAT_CAT, 1);
+            var possStartLocs = HexCoord.GetAtRangeFromLoc (4, new HexCoord (0, 0, 0)).FindAll((hc)=>IsLocationWalkable(hc));
+
+            BdgRandom.ShuffleList<HexCoord> (possStartLocs);
+            var sl0 = possStartLocs [UnityEngine.Random.Range(0,possStartLocs.Count)];
+
+            var bestDist = -1;
+            HexCoord bestLoc = null;
+            foreach (var hc in possStartLocs) {
+                var d = sl0.DistanceTo (hc);
+                if (d > bestDist) {
+                    bestDist = d;
+                    bestLoc = hc;
+                }
+            }
+            var sl1 = bestLoc;
+
+            var t0Starts = HexCoord.GetWithinRangeFromLoc (2, sl0).FindAll ((hc) => IsLocationWalkable (hc));
+            BdgRandom.ShuffleList<HexCoord> (t0Starts);
+
+            AddUnit ("Stan", t0Starts[0], SpriteId.SPRITE_COMBAT_GUY_1, 0);
+            AddUnit ("Kim", t0Starts [1], SpriteId.SPRITE_COMBAT_GUY_2, 0);
+            AddUnit ("Flexo", t0Starts [2], SpriteId.SPRITE_COMBAT_GUY_3, 0);
+            AddUnit ("Mags", t0Starts [3], SpriteId.SPRITE_COMBAT_GUY_4, 0);
+            AddUnit ("Torso", t0Starts [4], SpriteId.SPRITE_COMBAT_GUY_5, 0);
+            AddUnit ("Belto", t0Starts [5], SpriteId.SPRITE_COMBAT_GUY_6, 0);
+
+            var t1Starts = HexCoord.GetWithinRangeFromLoc (2, sl1).FindAll ((hc) => IsLocationWalkable (hc));
+            BdgRandom.ShuffleList<HexCoord> (t1Starts);
+
+            AddUnit ("Snake", t1Starts [0], SpriteId.SPRITE_COMBAT_SNAKE, 1);
+            AddUnit ("Dog",   t1Starts [1], SpriteId.SPRITE_COMBAT_DOG, 1);
+            AddUnit ("Ratman", t1Starts [2], SpriteId.SPRITE_COMBAT_RAT_MAN, 1);
+            AddUnit ("Crab",  t1Starts [3], SpriteId.SPRITE_COMBAT_CRAB, 1);
+            AddUnit ("Ghost", t1Starts [4], SpriteId.SPRITE_COMBAT_GHOST, 1);
+            AddUnit ("Djinn", t1Starts [5], SpriteId.SPRITE_COMBAT_DJINN, 1);
+            AddUnit ("Cat",   t1Starts [6], SpriteId.SPRITE_COMBAT_CAT, 1);
+
+            //AddUnit ("Snake", new HexCoord (-3, 0, 3), SpriteId.SPRITE_COMBAT_SNAKE, 1);
+            //AddUnit ("Snake", new HexCoord (-3, 3, 0), SpriteId.SPRITE_COMBAT_SNAKE, 1);
+            //AddUnit ("Snake", new HexCoord (0, -3, 3), SpriteId.SPRITE_COMBAT_SNAKE, 1);
+            //AddUnit ("Snake", new HexCoord (3, -3, 0), SpriteId.SPRITE_COMBAT_SNAKE, 1);
+            //AddUnit ("Snake", new HexCoord (0, 3, -3), SpriteId.SPRITE_COMBAT_SNAKE, 1);
 
             BdgRandom.ShuffleList (units);
             _movingUnit = 0;
@@ -61,12 +94,14 @@ namespace MicroTwenty
                 unit.currentHP = hp;
                 unit.maxHP = hp;
             }
+
+            _isDone = false;
         }
 
         public void Update (float deltaSeconds)
         {
             if (_currentOrder == null) {
-                UnityEngine.Debug.Log ("Generating Order");
+                //UnityEngine.Debug.Log ("Generating Order");
                 GenerateOrder (_movingUnit);
             }
 
@@ -75,6 +110,35 @@ namespace MicroTwenty
                 _movingUnit = (_movingUnit + 1) % units.Count;
                 _currentOrder = null;
             }
+
+            List<int> aliveTeams = GetAliveTeams ();
+            if (aliveTeams.Count == 0) {
+                UnityEngine.Debug.Log ("Everyone Dead");
+                _isDone = true;
+            } else if (aliveTeams.Count == 1) {
+                UnityEngine.Debug.LogFormat ("Team {0} wins", aliveTeams[0]);
+                _isDone = true;
+            }
+        }
+
+        public bool GetIsDone ()
+        {
+            return _isDone;
+        }
+
+        private List<int> GetAliveTeams ()
+        {
+            var outList = new List<int> ();
+            foreach (var unit in units) {
+                if (!unit.IsAlive ()) {
+                    continue;
+                }
+                var unitTeam = unit.GetTeamID ();
+                if (!outList.Contains (unitTeam)) {
+                    outList.Add (unitTeam);
+                }
+            }
+            return outList;
         }
 
         public void Draw ()
@@ -94,7 +158,16 @@ namespace MicroTwenty
                 }
                 //_mapManager.DrawSpriteAtLoc (unit.GetDynamicObjectType (), unit.GetHexCoord (), unit.GetDynamicObject ());
                 UnityEngine.Color teamColor = TeamColorUtil.GetColorForTeam (unit.GetTeamID ());
-                _mapManager.DrawTintedSpriteAtLocation (unit.GetSpriteId(), unit.GetHexCoord (), teamColor);
+                var unitCoord = unit.GetHexCoord ();
+                _mapManager.DrawTintedSpriteAtLocation (unit.GetSpriteId(), unitCoord, teamColor);
+                _mapManager.HexCoordToScreenCoords (unitCoord, out int px, out int py);
+
+                var offX = 3;
+                var offY = 14;
+                TextureDrawing.DrawRect (_mapManager.GetTargetTexture (), px+offX, py+offY, 10, 3, UnityEngine.Color.black, UnityEngine.Color.black, true, false);
+                var hpBar = Math.Max((8 * unit.currentHP) / unit.maxHP, 1);
+                //UnityEngine.Debug.LogFormat ("drawing hp {0}/{1} = {2}", unit.currentHP, unit.maxHP, hpBar);
+                TextureDrawing.DrawRect (_mapManager.GetTargetTexture (), px+offX+1, py+offY+1, hpBar, 1, UnityEngine.Color.green, UnityEngine.Color.black, true, false);
             }
 
             if (_currentOrder != null) {
@@ -110,7 +183,7 @@ namespace MicroTwenty
         private void GenerateOrder (int unitIndex)
         {
             var combatant = units [unitIndex];
-            UnityEngine.Debug.LogFormat ("combatant {0}", combatant.unitName);
+            //UnityEngine.Debug.LogFormat ("combatant {0}", combatant.unitName);
 
             if (!combatant.IsAlive ()) {
                 _currentOrder = new PassOrder (combatant);
@@ -132,11 +205,12 @@ namespace MicroTwenty
             List<CombatUnit> adjEnemies = GetEnemiesAdjacentTo (startCoord, combatant.GetTeamID());
             if (adjEnemies.Count != 0) {
                 var enemyIndex = UnityEngine.Random.Range (0, adjEnemies.Count);
-                _currentOrder = new AttackOrder (combatant, adjEnemies [enemyIndex]);
+                _currentOrder = new AttackOrder (_mapManager, combatant, adjEnemies [enemyIndex]);
                 return;
             }
 
             var locs = HexCoord.GetAtRangeFromLoc (1, startCoord).FindAll (IsLocationWalkable);
+            BdgRandom.ShuffleList<HexCoord> (locs);
 
             //UnityEngine.Debug.LogFormat ("found {0} locations", locs.Count);
 
@@ -146,21 +220,38 @@ namespace MicroTwenty
             } else {
                 var myLoc = combatant.GetHexCoord ();
                 var sources = MakeEnemyLocationList (combatant.GetTeamID ());
+
+                if (sources.Count == 0) {
+                    // we win?!
+                    _currentOrder = new PassOrder (combatant);
+                    return;
+                }
+
                 var walkableDict = MakeWalkableDict ();
                 walkableDict [myLoc] = true;
                 var distDict = MakeFloodFill (sources, walkableDict);
 
-                var minDist = distDict [locs [0]];
+                var minDist = -1;
                 var bestLoc = locs [0];
                 foreach (var testLoc in locs) {
+                    if (!distDict.ContainsKey (testLoc)) {
+                        continue;
+                    } 
                     var testDist = distDict [testLoc];
-                    if (testDist < minDist) {
+                    if ((minDist == -1) || (testDist < minDist)) {
                         minDist = testDist;
                         bestLoc = testLoc;
                     }
                 }
 
-                if (minDist >= distDict [myLoc]) {
+                if (minDist == -1) {
+                    UnityEngine.Debug.Log ("no moves found");
+                    _currentOrder = new PassOrder (combatant);
+                    return;
+                }
+
+                if ((distDict.ContainsKey(myLoc)) &&
+                    (minDist >= distDict [myLoc])) {
                     UnityEngine.Debug.Log ("no improvement");
                     _currentOrder = new PassOrder (combatant);
                     return;
@@ -196,6 +287,7 @@ namespace MicroTwenty
             //UnityEngine.Debug.LogFormat ("start coord {0} {1} {2}", startCoord.x, startCoord.y, startCoord.z);
 
             var locs = HexCoord.GetAtRangeFromLoc (1, startCoord).FindAll (IsLocationWalkable);
+            BdgRandom.ShuffleList<HexCoord> (locs);
 
             //UnityEngine.Debug.LogFormat ("found {0} locations", locs.Count);
 
@@ -208,6 +300,15 @@ namespace MicroTwenty
                 var walkableDict = MakeWalkableDict ();
                 walkableDict [myLoc] = true;
                 var distDict = MakeFloodFill (sources, walkableDict);
+
+                var amountToHeal = (combatant.maxHP - combatant.currentHP) * 3 / 4;
+
+                if ((!distDict.ContainsKey(myLoc)) ||
+                    (distDict [myLoc] >= amountToHeal)) {
+                    // we're probably safe?
+                    _currentOrder = new PassOrder (combatant);
+                    return;
+                }
 
                 var maxDist = distDict [locs [0]];
                 var bestLoc = locs [0];

@@ -150,6 +150,11 @@ namespace MicroTwenty
             // dynamic objects handled by combatMgr
         }
 
+        internal Texture2D GetTargetTexture ()
+        {
+            return targetTexture;
+        }
+
         internal List<HexTile> GetTiles ()
         {
             return GetHexMap ().GetTiles ();
@@ -196,6 +201,14 @@ namespace MicroTwenty
                 (_combatMgr.InCombat)) {
                 _combatMgr.Update (deltaSeconds);
                 drawn = false;
+
+                if (_combatMgr.GetIsDone ()) {
+                    UnityEngine.Debug.Log ("Combat is done, incombat = false");
+                    _combatMgr.InCombat = false;
+
+                    // TODO return player to where they were beforehand
+                    TeleportPlayer ("ep_1", new HexCoord (0, 0, 0));
+                }
             }
 
             if (!drawn) {
@@ -568,6 +581,31 @@ namespace MicroTwenty
 
         private void DrawPartialSprite (Texture2D targetTexture, Texture2D sourceTexture, int tx, int ty, int sx, int sy, int width, int height)
         {
+            if (tx < 0) {
+                width += tx;
+                tx = 0;
+            }
+            if (tx + width >= targetTexture.width) {
+                width = targetTexture.width - tx - 1;
+            }
+
+            if (width <= 0) {
+                return;
+            }
+
+            if (ty < 0) {
+                height += ty;
+                ty = 0;
+            }
+            if (ty + height >= targetTexture.height) {
+                height = targetTexture.height - ty - 1;
+            }
+
+            if (height <= 0) {
+                return;
+            }
+
+
             var targpixels = targetTexture.GetPixels (tx, ty, width, height);
             var sourcePixels = sourceTexture.GetPixels (sx, sy, width, height);
 
@@ -585,6 +623,30 @@ namespace MicroTwenty
 
         private void DrawTintedPartialSprite (Texture2D targetTexture, Texture2D sourceTexture, int tx, int ty, int sx, int sy, int width, int height, Color tint)
         {
+            if (tx < 0) {
+                width += tx;
+                tx = 0;
+            }
+            if (tx + width >= targetTexture.width) {
+                width = targetTexture.width - tx - 1;
+            }
+
+            if (width <= 0) {
+                return;
+            }
+
+            if (ty < 0) {
+                height += ty;
+                ty = 0;
+            }
+            if (ty + height >= targetTexture.height) {
+                height = targetTexture.height - ty - 1;
+            }
+
+            if (height <= 0) {
+                return;
+            }
+
             var targpixels = targetTexture.GetPixels (tx, ty, width, height);
             var sourcePixels = sourceTexture.GetPixels (sx, sy, width, height);
 

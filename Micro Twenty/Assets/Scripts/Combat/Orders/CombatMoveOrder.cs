@@ -4,7 +4,6 @@ namespace MicroTwenty
     public class CombatMoveOrder : CombatOrder
     {
         float elapsedTime;
-        float moveDuration;
         private MapManager _mapMgr;
         private HexMap _map;
         private HexCoord _startCoord;
@@ -15,6 +14,7 @@ namespace MicroTwenty
         private int _screenPosY;
 
         const float JUMP_HEIGHT = 12.0f;
+        const float MOVE_DURATION = 0.8f;
 
         private const float _blinkDuration = 0.314f;
 
@@ -26,25 +26,26 @@ namespace MicroTwenty
             _destination = destination;
             _combatant = combatant;
             elapsedTime = 0;
-            moveDuration = 1.0f;
+            _combatant.SetHexCoord (_destination);
 
             _mapMgr.HexCoordToScreenCoords (_startCoord, out _screenPosX, out _screenPosY);
         }
 
         public bool IsDone ()
         {
-            return elapsedTime >= moveDuration;
+            var md = MOVE_DURATION;
+            if (UnityEngine.Input.GetKey (UnityEngine.KeyCode.LeftShift)) {
+                md = 0.05f;
+            }
+
+            return elapsedTime >= md;
         }
 
         public void Update (float deltaSeconds)
         {
             elapsedTime += deltaSeconds;
 
-            EvalJumpPos (_startCoord, _destination, moveDuration, out _screenPosX, out _screenPosY);
-
-            if (elapsedTime >= moveDuration) {
-                _combatant.SetHexCoord (_destination);
-            }
+            EvalJumpPos (_startCoord, _destination, MOVE_DURATION, out _screenPosX, out _screenPosY);
         }
 
         public void Draw ()

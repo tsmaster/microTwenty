@@ -117,6 +117,16 @@ namespace MicroTwenty
             return outList;
         }
 
+        internal static List<HexCoord> GetWithinRangeFromLoc (int v, HexCoord startCoord)
+        {
+            List<HexCoord> outList = new List<HexCoord> ();
+            foreach (var hc in GetWithinRange (v)) {
+                outList.Add (hc.Add (startCoord));
+            }
+            return outList;
+        }
+
+
         public bool Equals (HexCoord a, HexCoord b)
         {
             UnityEngine.Debug.LogFormat ("(2) testing {0} == {1}", a.ToString (), b.ToString ());
