@@ -115,9 +115,27 @@ def compileMap(inFileName, outFileName, outName, className):
             writeHeader(className, outName, outFile)
             lineStart = pageStart
             for lineNum, line in enumerate(inFile.readlines()):
+                if "|" in line:
+                    barIndex = line.index("|")
+                    line = line[:barIndex]
+                
                 line = line.strip()
                 if not line:
-                    break
+                    continue
+
+                if line[0] == ':':
+                    if line.startswith(":NW="):
+                        hc = line[5:]
+                        closeParenIndex = hc.index(")")
+                        hc = hc[:closeParenIndex]
+                        coords = hc.split(",")
+                        xc = int(coords[0])
+                        yc = int(coords[1])
+                        zc = int(coords[2])
+                        pageStart = Hex3Coord(xc, yc, zc)
+                        lineStart = pageStart
+                        continue
+
                 #print ("line #", lineNum)
                 curPos = lineStart
                 for cn, c in enumerate(line):
@@ -147,6 +165,8 @@ filedescs = [("ep_1.txt", "ep_1.cs", "ep_1", "Episode1Map"),
              ("ep1c_rycroft.txt", "ep1c_rycroft.cs", "ep1c_rycroft", "Ep1CityRycroftMap"),
              ("ep1d_rathole.txt", "ep1d_rathole.cs", "ep1d_rathole", "Ep1DungeonRatHoleMap"),
              ("combat.txt", "combatmap.cs", "combat", "CombatMap"),
+             ("bigcombat.txt", "bigcombatmap.cs", "bigcombat", "BigCombatMap"),
+             ("ratIsland.txt", "ratisland.cs", "ratisland", "RatIsland"),
 ]
 
 for d in filedescs:

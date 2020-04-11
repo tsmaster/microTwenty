@@ -95,7 +95,9 @@ namespace MicroTwenty
                 new Episode6Map(_gameMgr),
                 new Ep1CityRycroftMap(_gameMgr),
                 new Ep1DungeonRatHoleMap(_gameMgr),
-                new CombatMap(_gameMgr)
+                new CombatMap(_gameMgr),
+                new BigCombatMap(_gameMgr),
+                new RatIsland(_gameMgr),
             };
 
             AddLevelHacks ();
@@ -215,7 +217,7 @@ namespace MicroTwenty
             i = GetMapByName ("ep1c_rycroft");
             maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (4, 4, -8), "ep_1", new HexCoord (0, -4, 4)));
             maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (-8, 3, 5), "ep_1", new HexCoord (0, -4, 4)));
-            maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (-1, -10, 11), "ep_1", new HexCoord (1, -7, 6)));
+            maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (-1, -10, 11), "ratisland", new HexCoord (-9, 9, 0)));
 
             i = GetMapByName ("ep1d_rathole");
             maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (0, -2, 2), "ep_1", new HexCoord (1, 2, -3)));
@@ -223,6 +225,16 @@ namespace MicroTwenty
 
             i = GetMapByName ("combat");
             // dynamic objects handled by combatMgr
+
+            i = GetMapByName ("ratisland");
+            maps [i].dynamicObjects.Add (new CombatTrigger (_gameMgr, new HexCoord (3, 0, -3), "bigcombat", new HexCoord (0, 0, 0)));
+            maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (-9, 9, 0), "ep1c_rycroft", new HexCoord (-1, -10, 11)));
+            maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (3, -6, 3), "ep_5", new HexCoord (1, 1, -2)));
+            maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (9, -10, 1), "ep_2", new HexCoord (-6, 3, 3)));
+
+            i = GetMapByName ("bigcombat");
+            // dynamic objects handled by combatMgr
+
         }
 
         internal Texture2D GetTargetTexture ()
