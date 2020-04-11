@@ -15,6 +15,7 @@ Current features
 - added attack actions
 - displaying Hit Points above sprites
 - combat ends and return to overland map when one (or fewer) teams survive
+- pop up menu system, press 'M'
 
 Near term TODO
 - add A* pathfinding for longer moves

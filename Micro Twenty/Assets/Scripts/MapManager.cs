@@ -49,6 +49,9 @@ namespace MicroTwenty
         private Texture2D fontBitmap;
 
         [SerializeField]
+        private Texture2D menuBitmap;
+
+        [SerializeField]
         private CanvasRenderer targetCanvasRenderer;
 
         [SerializeField]
@@ -70,6 +73,9 @@ namespace MicroTwenty
 
         List<DynamicObject> dynamicObjects;
         private CombatMgr _combatMgr;
+
+        public MenuManager _menuMgr;
+        public MenuObject _mainMenu;
 
 
         // Start is called before the first frame update
@@ -107,6 +113,75 @@ namespace MicroTwenty
             playerPos = new HexCoord (0, 0, 0);
             var playerObject = new DynamicObject (_gameMgr, playerPos, DynamicObject.DynamicObjectType.PLAYER, false);
             dynamicObjects.Add (playerObject);
+
+            _menuMgr = new MenuManager (menuBitmap, fontBitmap);
+            _mainMenu = new MenuObject ("main menu", menuBitmap, fontBitmap);
+            _mainMenu.SetWindow (1, 4);
+            _mainMenu.AddItem ("Party");
+            _mainMenu.AddItem ("Combat").SetWindow (1, 4);
+            _mainMenu ["Combat"].AddItem ("Attack");
+            _mainMenu ["Combat"].AddItem ("Defend");
+            _mainMenu ["Combat"].AddItem ("Item").SetWindow (1, 5);
+            _mainMenu ["Combat"] ["Item"].AddItem ("Map");
+            _mainMenu ["Combat"] ["Item"].AddItem ("Compass");
+            _mainMenu ["Combat"] ["Item"].AddItem ("Heal");
+            _mainMenu ["Combat"] ["Item"].AddItem ("Restore");
+            _mainMenu ["Combat"] ["Item"].AddItem ("Revive");
+            _mainMenu ["Combat"] ["Item"].AddItem ("Mana");
+            _mainMenu ["Combat"] ["Item"].AddItem ("Teleport").SetEnabled(false);
+            _mainMenu ["Combat"].AddItem ("Magic").SetWindow (2, 6);
+            _mainMenu ["Combat"] ["Magic"].AddItem ("Minor Heal");
+            _mainMenu ["Combat"] ["Magic"].AddItem ("Heal");
+            _mainMenu ["Combat"] ["Magic"].AddItem ("Major Heal");
+            _mainMenu ["Combat"] ["Magic"].AddItem ("Light");
+            _mainMenu ["Combat"] ["Magic"].AddItem ("Reveal");
+            _mainMenu ["Combat"] ["Magic"].AddItem ("M. Mouth");
+            _mainMenu ["Combat"] ["Magic"].AddItem ("Fireball");
+            _mainMenu ["Combat"] ["Magic"].AddItem ("Exp. FBall");
+            _mainMenu ["Combat"] ["Magic"].AddItem ("Lightning");
+            _mainMenu ["Combat"] ["Magic"].AddItem ("Chn Ltning");
+            _mainMenu ["Combat"] ["Magic"].AddItem ("Sum. Rat");
+            _mainMenu ["Combat"] ["Magic"].AddItem ("Sum. Ratman");
+            _mainMenu ["Combat"] ["Magic"].AddItem ("Sum. Skeleton");
+            _mainMenu ["Combat"] ["Magic"].AddItem ("Sum. Zombie");
+            _mainMenu ["Combat"] ["Magic"].AddItem ("Sum. Dragon");
+            _mainMenu ["Combat"] ["Magic"].AddItem ("Queasiness");
+            _mainMenu ["Combat"] ["Magic"].AddItem ("Sickness");
+            _mainMenu ["Combat"] ["Magic"].AddItem ("Illness");
+            _mainMenu ["Combat"] ["Magic"].AddItem ("Plague");
+            _mainMenu ["Combat"] ["Magic"].AddItem ("Minor Death").SetEnabled(false);
+            _mainMenu ["Combat"] ["Magic"].AddItem ("Death");
+            _mainMenu ["Combat"] ["Magic"].AddItem ("Major Death");
+            _mainMenu ["Combat"] ["Magic"].AddItem ("Red Death");
+            _mainMenu ["Combat"] ["Magic"].AddItem ("Raise Dead");
+            _mainMenu ["Combat"].AddItem ("Wear").SetWindow(2, 5);
+            _mainMenu ["Combat"] ["Wear"].AddItem ("* None *");
+            _mainMenu ["Combat"] ["Wear"].AddItem ("Cloth");
+            _mainMenu ["Combat"] ["Wear"].AddItem ("Leather");
+            _mainMenu ["Combat"] ["Wear"].AddItem ("Scale");
+            _mainMenu ["Combat"] ["Wear"].AddItem ("Banded");
+            _mainMenu ["Combat"] ["Wear"].AddItem ("Studded");
+            _mainMenu ["Combat"] ["Wear"].AddItem ("Plate");
+            _mainMenu ["Combat"] ["Wear"].AddItem ("+1 Plate");
+            _mainMenu ["Combat"] ["Wear"].AddItem ("Sm. Shld");
+            _mainMenu ["Combat"] ["Wear"].AddItem ("Md. Shld");
+            _mainMenu ["Combat"] ["Wear"].AddItem ("Lg. Shld");
+            _mainMenu ["Combat"].AddItem ("Wield").SetWindow (2, 6);
+            _mainMenu ["Combat"] ["Wield"].AddItem ("* None *");
+            _mainMenu ["Combat"] ["Wield"].AddItem ("Dagger");
+            _mainMenu ["Combat"] ["Wield"].AddItem ("Club");
+            _mainMenu ["Combat"] ["Wield"].AddItem ("Mace");
+            _mainMenu ["Combat"] ["Wield"].AddItem ("Flail");
+            _mainMenu ["Combat"] ["Wield"].AddItem ("Sword");
+            _mainMenu ["Combat"] ["Wield"].AddItem ("Falchion");
+            _mainMenu ["Combat"] ["Wield"].AddItem ("Halberd");
+            _mainMenu ["Combat"] ["Wield"].AddItem ("Flm Sword");
+            _mainMenu.AddItem ("Lore");
+            _mainMenu.AddItem ("Help");
+            _mainMenu.AddItem ("Cheat");
+            _mainMenu.AddItem ("Debug");
+            _mainMenu.AddItem ("Quit");
+            _mainMenu.Build();
         }
 
         private void AddLevelHacks ()
@@ -226,6 +301,8 @@ namespace MicroTwenty
                 }
             }
 
+            // Movement
+
             if (Input.GetKeyDown (KeyCode.D)) {
                 // go east
                 tryMove (new HexCoord (1, -1, 0));
@@ -250,35 +327,64 @@ namespace MicroTwenty
                 // go southeast
                 tryMove (new HexCoord (0, -1, 1));
             }
-        }
 
-        private void DrawStringAt (string message, int x, int y, Color color)
-        {
-            for (int i = 0; i < message.Length; ++i) {
-                var pos_x = i * 6 + x;
-                var pos_y = y;
+            // Menu
+            if (Input.GetKeyDown (KeyCode.M)) {
+                // show menu
+                ShowMenu ();
+            }
+            if (Input.GetKeyDown (KeyCode.UpArrow)) {
+                // show menu
+                _menuMgr.OnUp ();
+            }
+            if (Input.GetKeyDown (KeyCode.DownArrow)) {
+                // show menu
+                _menuMgr.OnDown ();
+            }
+            if (Input.GetKeyDown (KeyCode.LeftArrow)) {
+                // show menu
+                _menuMgr.OnLeft ();
+            }
+            if (Input.GetKeyDown (KeyCode.RightArrow)) {
+                // show menu
+                _menuMgr.OnRight ();
+            }
+            if ((Input.GetKeyDown (KeyCode.Space)) ||
+                (Input.GetKeyDown (KeyCode.Return)) ||
+                (Input.GetButtonDown("Submit"))) {
+                // show menu
+                _menuMgr.OnActivate ();
+            }
+            if ((Input.GetKeyDown (KeyCode.Escape)) ||
+                (Input.GetButtonDown("Cancel"))) {
+                // show menu
+                _menuMgr.OnBack ();
+            }
 
-                char c = message [i];
-                int coff = (int)c - 32;
-
-                var c_col = coff % 8;
-                var c_row = 11 - coff / 8;
-
-                DrawTintedPartialSprite (targetTexture, fontBitmap, pos_x, pos_y, c_col * 8, c_row * 8, 8, 8, color);
+            if (_menuMgr.IsOpen ()) {
+                _menuMgr.Draw (targetTexture, 10, targetTexture.height - 10);
+                drawn = false;
             }
         }
 
+        private void ShowMenu ()
+        {
+            if (!_menuMgr.IsOpen ()) {
+                _menuMgr.OpenMenu (_mainMenu);
+            }
+        }
 
         private void DrawText ()
         {
-            var msg = GetHexMap ().Name();
+            var msg = GetHexMap ().Name ();
 
             TextureDrawing.DrawRect (targetTexture, 4, targetTextureHeight - 14, (msg.Length + 1) * 6, 12, Color.black, Color.green, true, true);
 
-            DrawStringAt (msg, 6, targetTextureHeight - 12, Color.white);
+            TextureDrawing.DrawStringAt (targetTexture, fontBitmap, msg, 6, targetTextureHeight - 12, Color.white);
 
             targetTexture.Apply ();
         }
+
 
         public HexMap GetHexMap () {
             return maps [selectedMap];
@@ -477,7 +583,8 @@ namespace MicroTwenty
                     continue;
                 }
 
-                DrawTintedPartialSprite (targetTexture, hexTileSheet, px, py, source_x, source_y, tile_width, tile_height, tile_tint);
+                TextureDrawing.DrawTintedPartialSprite (targetTexture, hexTileSheet, 
+                    px, py, source_x, source_y, tile_width, tile_height, tile_tint);
             }
 
             foreach (var dynobj in dynamicObjects) {
@@ -509,21 +616,23 @@ namespace MicroTwenty
         {
             GetSpriteCoords (spriteId, out int sprite_x, out int sprite_y);
 
-            DrawPartialSprite (targetTexture, hexTileSheet, screenPosX, screenPosY, sprite_x, sprite_y, 16, 16);
+            TextureDrawing.DrawPartialSprite (targetTexture, hexTileSheet, screenPosX, screenPosY, sprite_x, sprite_y, 16, 16);
         }
 
         public void DrawTintedSpriteAtPos (SpriteId spriteId, int screenPosX, int screenPosY, Color c)
         {
             GetSpriteCoords (spriteId, out int sprite_x, out int sprite_y);
 
-            DrawTintedPartialSprite (targetTexture, hexTileSheet, screenPosX, screenPosY, sprite_x, sprite_y, 16, 16, c);
+            TextureDrawing.DrawTintedPartialSprite (targetTexture, hexTileSheet, 
+                screenPosX, screenPosY, sprite_x, sprite_y, 16, 16, c);
         }
 
         public void DrawTintedSpriteAtLocation (SpriteId spriteId, HexCoord hexCoord, Color c)
         {
             HexCoordToScreenCoords (hexCoord, out int px, out int py);
             GetSpriteCoords (spriteId, out int source_x, out int source_y);
-            DrawTintedPartialSprite (targetTexture, hexTileSheet, px, py, source_x, source_y, 16, 16, c);
+            TextureDrawing.DrawTintedPartialSprite (targetTexture, hexTileSheet, 
+                px, py, source_x, source_y, 16, 16, c);
         }
 
         public void DrawSpriteAtLoc (DynamicObject.DynamicObjectType objType, HexCoord hexCoord, DynamicObject obj)
@@ -576,90 +685,7 @@ namespace MicroTwenty
                 return;
             }
 
-            DrawPartialSprite (targetTexture, hexTileSheet, px, py, source_x, source_y, 16, 16);
-        }
-
-        private void DrawPartialSprite (Texture2D targetTexture, Texture2D sourceTexture, int tx, int ty, int sx, int sy, int width, int height)
-        {
-            if (tx < 0) {
-                width += tx;
-                tx = 0;
-            }
-            if (tx + width >= targetTexture.width) {
-                width = targetTexture.width - tx - 1;
-            }
-
-            if (width <= 0) {
-                return;
-            }
-
-            if (ty < 0) {
-                height += ty;
-                ty = 0;
-            }
-            if (ty + height >= targetTexture.height) {
-                height = targetTexture.height - ty - 1;
-            }
-
-            if (height <= 0) {
-                return;
-            }
-
-
-            var targpixels = targetTexture.GetPixels (tx, ty, width, height);
-            var sourcePixels = sourceTexture.GetPixels (sx, sy, width, height);
-
-            for (int x = 0; x < width; ++x) {
-                for (int y = 0; y < height; ++y) {
-                    Color c = sourcePixels [x + y * width];
-                    if (c.a < 1.0f / 256) {
-                        continue;
-                    }
-                    targpixels [x + y * width] = c;
-                }
-            }
-            targetTexture.SetPixels (tx, ty, width, height, targpixels);
-        }
-
-        private void DrawTintedPartialSprite (Texture2D targetTexture, Texture2D sourceTexture, int tx, int ty, int sx, int sy, int width, int height, Color tint)
-        {
-            if (tx < 0) {
-                width += tx;
-                tx = 0;
-            }
-            if (tx + width >= targetTexture.width) {
-                width = targetTexture.width - tx - 1;
-            }
-
-            if (width <= 0) {
-                return;
-            }
-
-            if (ty < 0) {
-                height += ty;
-                ty = 0;
-            }
-            if (ty + height >= targetTexture.height) {
-                height = targetTexture.height - ty - 1;
-            }
-
-            if (height <= 0) {
-                return;
-            }
-
-            var targpixels = targetTexture.GetPixels (tx, ty, width, height);
-            var sourcePixels = sourceTexture.GetPixels (sx, sy, width, height);
-
-            for (int x = 0; x < width; ++x) {
-                for (int y = 0; y < height; ++y) {
-                    Color c = sourcePixels [x + y * width];
-                    if (c.a < 1.0f / 256) {
-                        continue;
-                    }
-                    targpixels [x + y * width] = c * tint;
-                }
-            }
-            targetTexture.SetPixels (tx, ty, width, height, targpixels);
+            TextureDrawing.DrawPartialSprite (targetTexture, hexTileSheet, px, py, source_x, source_y, 16, 16);
         }
 
         internal void TeleportPlayer (string destMapName, HexCoord destMapCoord)
