@@ -98,6 +98,11 @@ namespace MicroTwenty
                 new CombatMap(_gameMgr),
                 new BigCombatMap(_gameMgr),
                 new RatIsland(_gameMgr),
+                new CavernsMap(_gameMgr),
+                new DocksMap(_gameMgr),
+                new LabyrinthMap(_gameMgr),
+                new RiverCrossingMap(_gameMgr),
+                new TownMap(_gameMgr),
             };
 
             AddLevelHacks ();
@@ -181,6 +186,23 @@ namespace MicroTwenty
             _mainMenu.AddItem ("Lore");
             _mainMenu.AddItem ("Help");
             _mainMenu.AddItem ("Cheat");
+            _mainMenu ["Cheat"] ["Teleport"].SetWindow (2, 8);
+            _mainMenu ["Cheat"] ["Teleport"] ["ep_1"].SetItemId (1000);
+            _mainMenu ["Cheat"] ["Teleport"] ["ep_2"].SetItemId (1001);
+            _mainMenu ["Cheat"] ["Teleport"] ["ep_3"].SetItemId (1002);
+            _mainMenu ["Cheat"] ["Teleport"] ["ep_4"].SetItemId (1003);
+            _mainMenu ["Cheat"] ["Teleport"] ["ep_5"].SetItemId (1004);
+            _mainMenu ["Cheat"] ["Teleport"] ["ep_6"].SetItemId (1005);
+            _mainMenu ["Cheat"] ["Teleport"] ["combat"].SetItemId (1010);
+            _mainMenu ["Cheat"] ["Teleport"] ["bigcombat"].SetItemId (1011);
+            _mainMenu ["Cheat"] ["Teleport"] ["caverns"].SetItemId (2001);
+            _mainMenu ["Cheat"] ["Teleport"] ["docks"].SetItemId (2002);
+            _mainMenu ["Cheat"] ["Teleport"] ["labyrinth"].SetItemId (2003);
+            _mainMenu ["Cheat"] ["Teleport"] ["rvr_cross"].SetItemId (2004);
+            _mainMenu ["Cheat"] ["Teleport"] ["town"].SetItemId (2005);
+            _mainMenu ["Cheat"] ["Teleport"] ["c_ryc"].SetItemId (3001);
+            _mainMenu ["Cheat"] ["Teleport"] ["d_hole"].SetItemId (3002);
+            _mainMenu ["Cheat"] ["Teleport"] ["rat isl"].SetItemId (3003);
             _mainMenu.AddItem ("Debug");
             _mainMenu.AddItem ("Quit");
             _mainMenu.Build();
@@ -189,22 +211,22 @@ namespace MicroTwenty
         private void AddLevelHacks ()
         {
             int i = GetMapByName ("ep_1");
-            maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (5, -8, 3), "ep_2", new HexCoord (-6, 3, 3)));
+            maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (5, -8, 3), "ep_2", new HexCoord (-7, 4, 3)));
             maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (0, -4, 4), "ep1c_rycroft", new HexCoord (0, 0, 0)));
             maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (1, -8, 7), "ep_1", new HexCoord (0, -4, 4)));
             maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (1, 2, -3), "ep1d_rathole", new HexCoord (0, -2, 2)));
             maps [i].dynamicObjects.Add (new CombatTrigger (_gameMgr, new HexCoord (-2, 3, -1), "combat", new HexCoord(0, 0, 0)));
 
             i = GetMapByName ("ep_2");
-            maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (-6, 3, 3), "ep_1", new HexCoord (5, -8, 3)));
-            maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (5, -8, 3), "ep_3", new HexCoord (-6, 3, 3)));
+            maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (-7, 4, 3), "ep_1", new HexCoord (5, -8, 3)));
+            maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (5, -8, 3), "ep_3", new HexCoord (-7, 4, 3)));
 
             i = GetMapByName ("ep_3");
-            maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (-6, 3, 3), "ep_2", new HexCoord (5, -8, 3)));
-            maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (1, -1, 0), "ep_4", new HexCoord (1, 1, -2)));
+            maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (-7, 4, 3), "ep_2", new HexCoord (5, -8, 3)));
+            maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (1, -1, 0), "ep_4", new HexCoord (1, 0, -1)));
 
             i = GetMapByName ("ep_4");
-            maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (1, 1, -2), "ep_3", new HexCoord (1, -1, 0)));
+            maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (1, 0, -1), "ep_3", new HexCoord (1, -1, 0)));
             maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (-9, 1, 8), "ep_5", new HexCoord (2, -10, 8)));
 
             i = GetMapByName ("ep_5");
@@ -218,6 +240,7 @@ namespace MicroTwenty
             maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (4, 4, -8), "ep_1", new HexCoord (0, -4, 4)));
             maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (-8, 3, 5), "ep_1", new HexCoord (0, -4, 4)));
             maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (-1, -10, 11), "ratisland", new HexCoord (-9, 9, 0)));
+            maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (-6, -3, 9), "caverns", new HexCoord (-9, 1, 8)));
 
             i = GetMapByName ("ep1d_rathole");
             maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (0, -2, 2), "ep_1", new HexCoord (1, 2, -3)));
@@ -235,6 +258,25 @@ namespace MicroTwenty
             i = GetMapByName ("bigcombat");
             // dynamic objects handled by combatMgr
 
+            i = GetMapByName ("caverns");
+            maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (-9, 1, 8), "ep1c_rycroft", new HexCoord (-6, -3, 9)));
+            maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (-1, 8, -7), "docks", new HexCoord (-10, 10, 0)));
+
+            i = GetMapByName ("docks");
+            maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (-10, 10, 0), "caverns", new HexCoord (-1, 8, -7)));
+            maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (10, -10, 0), "labyrinth", new HexCoord (2, -10, 8)));
+
+            i = GetMapByName ("labyrinth");
+            maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (2, -10, 8), "docks", new HexCoord (10, -10, 0)));
+            maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (-2, 10, -8), "river_crossing", new HexCoord (-9, 9, 0)));
+
+            i = GetMapByName ("river_crossing");
+            maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (-9, 9, 0), "labyrinth", new HexCoord (-2, 10, -8)));
+            maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (9, -9, 0), "town", new HexCoord (-14, 5, 9)));
+
+            i = GetMapByName ("town");
+            maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (-14, 5, 9), "river_crossing", new HexCoord (9, -9, 0)));
+            maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (14, -5, -9), "ep_1", new HexCoord (0, 0, 0)));
         }
 
         internal Texture2D GetTargetTexture ()
@@ -364,8 +406,80 @@ namespace MicroTwenty
             if ((Input.GetKeyDown (KeyCode.Space)) ||
                 (Input.GetKeyDown (KeyCode.Return)) ||
                 (Input.GetButtonDown("Submit"))) {
-                // show menu
-                _menuMgr.OnActivate ();
+
+                var result = _menuMgr.OnActivate ();
+                if (result != null) {
+                    var resId = result.GetItemId ();
+                    switch (resId) {
+                    case 1000:
+                        // teleport to EP_1
+                        _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "ep_1", new HexCoord(0,0,0)));
+                        break;
+                    case 1001:
+                        // teleport to EP_2
+                        _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "ep_2", new HexCoord (1, 2, -3)));
+                        break;
+                    case 1002:
+                        // teleport to EP_3
+                        _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "ep_3", new HexCoord (0, 0, 0)));
+                        break;
+                    case 1003:
+                        // teleport to EP_4
+                        _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "ep_4", new HexCoord (0, 0, 0)));
+                        break;
+                    case 1004:
+                        // teleport to EP_5
+                        _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "ep_5", new HexCoord (0, 0, 0)));
+                        break;
+                    case 1005:
+                        // teleport to EP_6
+                        _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "ep_6", new HexCoord (0, 0, 0)));
+                        break;
+                    case 1010:
+                        // teleport to combat
+                        _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "combat", new HexCoord (0, 0, 0)));
+                        break;
+                    case 1011:
+                        // teleport to bigcombat
+                        _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "bigcombat", new HexCoord (0, 0, 0)));
+                        break;
+                    case 2001:
+                        // teleport to caverns
+                        _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "caverns", new HexCoord (0, 0, 0)));
+                        break;
+                    case 2002:
+                        // teleport to docks
+                        _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "docks", new HexCoord (-4, 4, 0)));
+                        break;
+                    case 2003:
+                        // teleport to labyrinth
+                        _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "labyrinth", new HexCoord (0, 0, 0)));
+                        break;
+                    case 2004:
+                        // teleport to river crossing
+                        _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "river_crossing", new HexCoord (-1, 1, 0)));
+                        break;
+                    case 2005:
+                        // teleport to town
+                        _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "town", new HexCoord (-1, 1, 0)));
+                        break;
+                    case 3001:
+                        // teleport to Rycroft
+                        _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "ep1c_rycroft", new HexCoord (-1, 1, 0)));
+                        break;
+                    case 3002:
+                        // teleport to rat hole
+                        _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "ep1d_rathole", new HexCoord (-1, 1, 0)));
+                        break;
+                    case 3003:
+                        // teleport to rat island
+                        _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "ratisland", new HexCoord (0, 0, 0)));
+                        break;
+                    default:
+                        Debug.Log ("Got unknown ID: " + resId);
+                        break;
+                    }
+                }
             }
             if ((Input.GetKeyDown (KeyCode.Escape)) ||
                 (Input.GetButtonDown("Cancel"))) {

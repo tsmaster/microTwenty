@@ -167,6 +167,12 @@ filedescs = [("ep_1.txt", "ep_1.cs", "ep_1", "Episode1Map"),
              ("combat.txt", "combatmap.cs", "combat", "CombatMap"),
              ("bigcombat.txt", "bigcombatmap.cs", "bigcombat", "BigCombatMap"),
              ("ratIsland.txt", "ratisland.cs", "ratisland", "RatIsland"),
+             
+             ("caverns.txt", "cavernsmap.cs", "caverns", "CavernsMap"),
+             ("docks.txt", "docksmap.cs", "docks", "DocksMap"),
+             ("labyrinth.txt", "labyrinthmap.cs", "labyrinth", "LabyrinthMap"),
+             ("river_crossing.txt", "rivercrossingmap.cs", "river_crossing", "RiverCrossingMap"),
+             ("town.txt", "townmap.cs", "town", "TownMap"),
 ]
 
 for d in filedescs:

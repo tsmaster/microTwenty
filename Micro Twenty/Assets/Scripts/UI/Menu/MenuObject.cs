@@ -38,6 +38,7 @@ namespace MicroTwenty
         private int _cursorIndex = 0;
 
         private int _numRows = 0;
+        private int _itemId = -1;
 
         public bool IsEnabled { get; set; }
 
@@ -268,6 +269,17 @@ namespace MicroTwenty
             _cw_height = height;
         }
 
+        public MenuObject SetItemId (int itemId)
+        {
+            _itemId = itemId;
+            return this;
+        }
+
+        public int GetItemId ()
+        {
+            return _itemId;
+        }
+
         #endregion // Layout Parameters
 
         #region Navigation
@@ -320,7 +332,6 @@ namespace MicroTwenty
                 return null;
             }
         }
-
         #endregion // Navigation
     }
 }
