@@ -166,6 +166,8 @@ filedescs = [("ep_1.txt", "ep_1.cs", "ep_1", "Episode1Map"),
              ("ep1d_rathole.txt", "ep1d_rathole.cs", "ep1d_rathole", "Ep1DungeonRatHoleMap"),
              ("combat.txt", "combatmap.cs", "combat", "CombatMap"),
              ("bigcombat.txt", "bigcombatmap.cs", "bigcombat", "BigCombatMap"),
+             ("combat_foyer.txt", "combatfoyermap.cs", "combat_foyer", "CombatFoyerMap"),
+             ("combat_hall.txt", "combathallmap.cs", "combat_hall", "CombatHallMap"),
              ("ratIsland.txt", "ratisland.cs", "ratisland", "RatIsland"),
              
              ("caverns.txt", "cavernsmap.cs", "caverns", "CavernsMap"),

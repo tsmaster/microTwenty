@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 namespace MicroTwenty
 {
@@ -110,6 +111,8 @@ namespace MicroTwenty
                 new Ep1DungeonRatHoleMap(_gameMgr),
                 new CombatMap(_gameMgr),
                 new BigCombatMap(_gameMgr),
+                new CombatFoyerMap(_gameMgr),
+                new CombatHallMap(_gameMgr),
                 new RatIsland(_gameMgr),
                 new CavernsMap(_gameMgr),
                 new DocksMap(_gameMgr),
@@ -363,7 +366,16 @@ namespace MicroTwenty
             /// HACK HACK HACK just for debugging, soak
             if ((_combatMgr == null) ||
                 (!_combatMgr.InCombat)) {
-                var combatMapName = UnityEngine.Random.Range (0, 2) == 0 ? "combat" : "bigcombat";
+                var combatMapIndex = Random.Range (0, 4);
+
+                string [] combatMaps = new string [] {
+                    "combat",
+                    "bigcombat",
+                    "combat_foyer",
+                    "combat_hall"
+                };
+
+                var combatMapName = combatMaps [combatMapIndex];
                 _gameMgr.AddCommand (new CombatCommand ("soak combat", _gameMgr, combatMapName, new HexCoord (0, 0, 0)));
             }
 
