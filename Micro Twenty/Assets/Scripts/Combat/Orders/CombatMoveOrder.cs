@@ -34,6 +34,10 @@ namespace MicroTwenty
         public bool IsDone ()
         {
             var md = MOVE_DURATION;
+
+            // HACK for debugging
+            md = 0.01f;
+
             if (UnityEngine.Input.GetKey (UnityEngine.KeyCode.LeftShift)) {
                 md = 0.05f;
             }

@@ -11,10 +11,15 @@ namespace MicroTwenty
         public int maxHP;
         public int currentMP;
         public int maxMP;
+        public int initiative;
+        public int lastTurnMoved;
+        public WeaponRep weapon;
+        public ArmorRep armor;
 
         public CombatantSprite _sprite;
 
         public int maxMove;
+
 
         public CombatUnit (string unitName, HexCoord hexCoord, int teamIndex, CombatantSprite sprite)
         {
@@ -22,6 +27,10 @@ namespace MicroTwenty
             this.hexCoord = hexCoord;
             this.teamIndex = teamIndex;
             _sprite = sprite;
+            initiative = 1;
+            lastTurnMoved = -1;
+            this.weapon = new WeaponFistRep ();
+            this.armor = new ArmorClothRep ();
         }
 
         public HexCoord GetHexCoord ()
@@ -58,6 +67,33 @@ namespace MicroTwenty
         public bool IsAlive ()
         {
             return currentHP > 0;
+        }
+
+        public int GetInitiative ()
+        {
+            return initiative;
+        }
+
+        public int GetLastTurnMoved ()
+        {
+            return lastTurnMoved;
+        }
+
+        internal void SetLastTurnMoved (int currentTurnNumber)
+        {
+            lastTurnMoved = currentTurnNumber;
+        }
+
+        public CombatUnit AddWeapon (WeaponRep wr)
+        {
+            weapon = wr;
+            return this;
+        }
+
+        public CombatUnit AddArmor (ArmorRep ar)
+        {
+            armor = ar;
+            return this;
         }
     }
 }

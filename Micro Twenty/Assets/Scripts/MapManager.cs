@@ -22,22 +22,35 @@ namespace MicroTwenty
         SPRITE_TILE_RAT_MAN = 11,
         SPRITE_TILE_SLIME = 12,
         SPRITE_TILE_TREE = 13,
-        SPRITE_TILE_CURSOR = 14,
-        SPRITE_TILE_SHIP = 15,
-        SPRITE_COMBAT_GUY = 16,
-        SPRITE_COMBAT_RAT_MAN = 17,
-        SPRITE_COMBAT_GUY_1 = 18,
-        SPRITE_COMBAT_GUY_2 = 19,
-        SPRITE_COMBAT_GUY_3 = 20,
-        SPRITE_COMBAT_GUY_4 = 21,
-        SPRITE_COMBAT_GUY_5 = 22,
-        SPRITE_COMBAT_GUY_6 = 23,
-        SPRITE_COMBAT_SNAKE = 24,
-        SPRITE_COMBAT_DOG = 25,
-        SPRITE_COMBAT_CAT = 26,
-        SPRITE_COMBAT_CRAB = 27,
-        SPRITE_COMBAT_GHOST = 28,
-        SPRITE_COMBAT_DJINN = 29,
+        SPRITE_TILE_CURSOR_CIRCLE = 14,
+        SPRITE_TILE_CURSOR_DOT = 15,
+        SPRITE_TILE_CURSOR_PLUS = 16,
+        SPRITE_TILE_CURSOR_X = 17,
+        SPRITE_TILE_DOT = 18,
+        SPRITE_TILE_SHIP = 19,
+        SPRITE_COMBAT_GUY = 20,
+        SPRITE_COMBAT_RAT_MAN = 21,
+        SPRITE_COMBAT_GUY_1 = 22, // stan
+        SPRITE_COMBAT_GUY_2 = 23, // kim
+        SPRITE_COMBAT_GUY_3 = 24, // flexo
+        SPRITE_COMBAT_GUY_4 = 25, // mags
+        SPRITE_COMBAT_GUY_5 = 26, // torso
+        SPRITE_COMBAT_GUY_6 = 27, // belto
+        SPRITE_COMBAT_SNAKE = 28,
+        SPRITE_COMBAT_DOG = 29,
+        SPRITE_COMBAT_CAT = 30,
+        SPRITE_COMBAT_CRAB = 31,
+        SPRITE_COMBAT_GHOST = 32,
+        SPRITE_COMBAT_DJINN = 33,
+        SPRITE_COMBAT_SKELETON = 34,
+        SPRITE_COMBAT_STAFF = 35,
+        SPRITE_COMBAT_BUG = 36,
+        SPRITE_SIGN = 37,
+        SPRITE_LAMPPOST = 38,
+        SPRITE_CHEST = 39,
+        SPRITE_POTION = 40,
+        SPRITE_SCROLL = 41,
+        SPRITE_CHICKEN_LEG = 42, // no, but seriously - what is this?
     };
 
     public class MapManager : MonoBehaviour
@@ -208,6 +221,8 @@ namespace MicroTwenty
             _mainMenu.Build();
         }
 
+        internal int GetUnitCount () => _combatMgr.GetUnitCount ();
+
         private void AddLevelHacks ()
         {
             int i = GetMapByName ("ep_1");
@@ -279,6 +294,11 @@ namespace MicroTwenty
             maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (14, -5, -9), "ep_1", new HexCoord (0, 0, 0)));
         }
 
+        internal Texture2D GetFontBitmap ()
+        {
+            return fontBitmap;
+        }
+
         internal Texture2D GetTargetTexture ()
         {
             return targetTexture;
@@ -338,6 +358,13 @@ namespace MicroTwenty
                     // TODO return player to where they were beforehand
                     TeleportPlayer ("ep_1", new HexCoord (0, 0, 0));
                 }
+            }
+
+            /// HACK HACK HACK just for debugging, soak
+            if ((_combatMgr == null) ||
+                (!_combatMgr.InCombat)) {
+                var combatMapName = UnityEngine.Random.Range (0, 2) == 0 ? "combat" : "bigcombat";
+                _gameMgr.AddCommand (new CombatCommand ("soak combat", _gameMgr, combatMapName, new HexCoord (0, 0, 0)));
             }
 
             if (!drawn) {
@@ -508,6 +535,17 @@ namespace MicroTwenty
 
             TextureDrawing.DrawStringAt (targetTexture, fontBitmap, msg, 6, targetTextureHeight - 12, Color.white);
 
+            if (_combatMgr != null) {
+                var zeroScoreString = _combatMgr.WinTally [0].ToString ();
+                var oneScoreString = _combatMgr.WinTally [1].ToString ();
+
+                TextureDrawing.DrawRect (targetTexture, 4, 3, (zeroScoreString.Length) * 6 + 4, 10, Color.black, Color.cyan, true, true);
+                TextureDrawing.DrawStringAt (targetTexture, fontBitmap, zeroScoreString, 6, 4, Color.cyan);
+
+                var startPos = 6 + 6 * zeroScoreString.Length + 12;
+                TextureDrawing.DrawRect (targetTexture, startPos, 3, (oneScoreString.Length * 6) + 4, 10, Color.black, Color.red, true, true);
+                TextureDrawing.DrawStringAt (targetTexture, fontBitmap, oneScoreString, startPos + 2, 4, Color.red);
+            }
             targetTexture.Apply ();
         }
 
@@ -602,8 +640,8 @@ namespace MicroTwenty
 
         private void GetSpriteCoords (SpriteId id, out int sx, out int sy)
         {
-            const int sheet_columns = 6;
-            const int sheet_rows = 6;
+            const int sheet_columns = 7;
+            const int sheet_rows = 7;
             const int tile_size = 16;
 
             var id_as_int = (int)id;
@@ -720,7 +758,11 @@ namespace MicroTwenty
                     Color c = team == 0 ? Color.cyan : Color.red;
                     DrawTintedSpriteAtLocation (combObj.GetSpriteId (), dynobj.hexCoord, c);
                 } else {
-                    DrawSpriteAtLoc (dynobj.objectType, dynobj.hexCoord, dynobj);
+                    // HACK HACK HACK
+                    if ((_combatMgr == null) ||
+                        (!_combatMgr.InCombat)) {
+                        DrawSpriteAtLoc (dynobj.objectType, dynobj.hexCoord, dynobj);
+                    }
                 }
             }
 
@@ -838,6 +880,16 @@ namespace MicroTwenty
                 _combatMgr = new CombatMgr (this, _gameMgr);
             }
             _combatMgr.InCombat = true;
+        }
+
+        public CombatUnit GetCombatUnitByName (string name)
+        {
+            return _combatMgr.GetCombatUnitByName (name);
+        }
+
+        internal CombatUnit GetCombatUnitByIndex (int movingCharIndex)
+        {
+            return _combatMgr.GetCombatUnitByIndex (movingCharIndex);
         }
     }
 }
