@@ -541,22 +541,32 @@ namespace MicroTwenty
 
         private void DrawText ()
         {
+            var fillColor = new Color (0, 0, 0, 0.5f);
+            var startPosY = targetTextureHeight - 14;
+            int msgHeight = 12;
+
             var msg = GetHexMap ().Name ();
 
-            TextureDrawing.DrawRect (targetTexture, 4, targetTextureHeight - 14, (msg.Length + 1) * 6, 12, Color.black, Color.green, true, true);
+            TextureDrawing.DrawRect (targetTexture, 4, startPosY, (msg.Length + 1) * 6, msgHeight, fillColor, Color.green, true, true);
 
-            TextureDrawing.DrawStringAt (targetTexture, fontBitmap, msg, 6, targetTextureHeight - 12, Color.white);
+            TextureDrawing.DrawStringAt (targetTexture, fontBitmap, msg, 6, startPosY + 2, Color.white);
 
             if (_combatMgr != null) {
                 var zeroScoreString = _combatMgr.WinTally [0].ToString ();
                 var oneScoreString = _combatMgr.WinTally [1].ToString ();
 
-                TextureDrawing.DrawRect (targetTexture, 4, 3, (zeroScoreString.Length) * 6 + 4, 10, Color.black, Color.cyan, true, true);
-                TextureDrawing.DrawStringAt (targetTexture, fontBitmap, zeroScoreString, 6, 4, Color.cyan);
+                var msgWidth = (oneScoreString.Length * 6) + 4;
+                var startPosX = targetTextureWidth - (oneScoreString.Length + 1) * 6;
 
-                var startPos = 6 + 6 * zeroScoreString.Length + 12;
-                TextureDrawing.DrawRect (targetTexture, startPos, 3, (oneScoreString.Length * 6) + 4, 10, Color.black, Color.red, true, true);
-                TextureDrawing.DrawStringAt (targetTexture, fontBitmap, oneScoreString, startPos + 2, 4, Color.red);
+                TextureDrawing.DrawRect (targetTexture, startPosX, startPosY, msgWidth, msgHeight, fillColor, Color.red, true, true);
+                TextureDrawing.DrawStringAt (targetTexture, fontBitmap, oneScoreString, startPosX + 2, startPosY + 2, Color.red);
+
+                msgWidth = (zeroScoreString.Length * 6) + 4; 
+                startPosX -= (6 + 6 * zeroScoreString.Length + 8);
+
+                TextureDrawing.DrawRect (targetTexture, startPosX, startPosY, msgWidth, msgHeight, fillColor, Color.cyan, true, true);
+                TextureDrawing.DrawStringAt (targetTexture, fontBitmap, zeroScoreString, startPosX + 2, startPosY + 2, Color.cyan);
+
             }
             targetTexture.Apply ();
         }
@@ -902,6 +912,11 @@ namespace MicroTwenty
         internal CombatUnit GetCombatUnitByIndex (int movingCharIndex)
         {
             return _combatMgr.GetCombatUnitByIndex (movingCharIndex);
+        }
+
+        internal CombatMgr GetCombatMgr ()
+        {
+            return _combatMgr;
         }
     }
 }

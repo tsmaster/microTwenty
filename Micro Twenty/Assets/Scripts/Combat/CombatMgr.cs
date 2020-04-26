@@ -17,6 +17,8 @@ namespace MicroTwenty
         private MiniMax _minimax;
         private int _currentTurnNumber;
 
+        private List<string> _logLines;
+
         public bool InCombat {
             get { return _inCombat; }
             set {
@@ -44,16 +46,19 @@ namespace MicroTwenty
         private float _preBattleClock;
         private float _postBattleClock;
 
-        public Dictionary<int, int> WinTally { get { return _winTally; }
+        public Dictionary<int, int> WinTally { 
+            get { return _winTally; }
             private set {
                 _winTally = value;
             } 
-            }
+        }
 
         private const float PRE_BATTLE_DURATION = 0.4f;
         private const float POST_BATTLE_DURATION = 0.4f;
 
         public const bool MINIMAX_AI = true;
+        private const int LOG_LINE_MAX_LENGTH = 32;
+        private const int LOG_LINE_MAX_LINES = 6;
 
         public CombatMgr (MapManager mapManager, GameMgr gameMgr)
         {
@@ -67,6 +72,35 @@ namespace MicroTwenty
                 [0] = 0,
                 [1] = 0
             };
+
+            _logLines = new List<string> ();
+        }
+
+        internal void AddLogLineFormat (string templ, params object [] parList)
+        {
+            string msg = string.Format (templ, parList);
+            AddLogLine (msg);
+        }
+
+        public void AddLogLine (string msg)
+        {
+            Debug.Log (msg);
+            while (msg.Length > 0) {
+                var clippedMsg = "";
+                if (msg.Length <= LOG_LINE_MAX_LENGTH) {
+                    clippedMsg = msg;
+                    msg = "";
+                } else {
+                    clippedMsg = msg.Substring (0, LOG_LINE_MAX_LENGTH);
+                    msg = "  " + msg.Substring (LOG_LINE_MAX_LENGTH);
+                }
+                _logLines.Add (clippedMsg);
+            }
+
+            if (_logLines.Count > LOG_LINE_MAX_LINES) {
+                var numToRemove = _logLines.Count - LOG_LINE_MAX_LINES;
+                _logLines.RemoveRange (0, numToRemove);
+            }
         }
 
         private CombatUnit AddUnit (string name, HexCoord hexCoord, SpriteId spriteId, int teamId) {
@@ -143,6 +177,8 @@ namespace MicroTwenty
             }
 
             _preCombatString = string.Format ("You face {0} monsters.", monsterCount);
+            _logLines.Clear ();
+            AddLogLine ("Combat Starts");
 
             foreach (var unit in units) {
                 var hp = UnityEngine.Random.Range (5, 10);
@@ -156,54 +192,52 @@ namespace MicroTwenty
             _postBattleClock = 0.0f;
     }
 
-    public void Update (float deltaSeconds)
-        {
-            switch (_combatPhase) {
-            case CombatPhase.PRE_COMBAT:
-                UpdatePreBattle (deltaSeconds);
-                return;
-            case CombatPhase.POST_COMBAT:
-                UpdatePostBattle (deltaSeconds);
-                return;
-            }
-
-            List<int> aliveTeams = GetAliveTeams ();
-            if (aliveTeams.Count == 0) {
-                UnityEngine.Debug.Log ("Everyone Dead");
-                _postCombatString = "Everyone has died, Hamlet.";
-                _combatPhase = CombatPhase.POST_COMBAT;
-                return;
-            } else if (aliveTeams.Count == 1) {
-                UnityEngine.Debug.LogFormat ("Team {0} wins", aliveTeams [0]);
-                if (aliveTeams [0] == 0) {
-                    _postCombatString = "You Win!";
-                } else {
-                    _postCombatString = "You have been defeated";
-                }
-                _combatPhase = CombatPhase.POST_COMBAT;
-                _winTally [aliveTeams [0]]++;
-                return;
-            }
-
-            if (_currentOrder == null) {
-                //UnityEngine.Debug.Log ("Generating Order");
-                GenerateOrder (deltaSeconds);
-            }
-
-            if (_currentOrder == null) {
-                // waiting for order
-                return;
-            }
-
-            _currentOrder.GetCombatUnit ().SetLastTurnMoved (_currentTurnNumber);
-
-            _currentOrder.Update (deltaSeconds);
-            if (_currentOrder.IsDone ()) {
-                // order is done
-                MaybeAdvanceCurrentTurn ();
-                _currentOrder = null;
-            }
+    public void Update (float deltaSeconds) {
+        switch (_combatPhase) {
+        case CombatPhase.PRE_COMBAT:
+            UpdatePreBattle (deltaSeconds);
+            return;
+        case CombatPhase.POST_COMBAT:
+            UpdatePostBattle (deltaSeconds);
+            return;
         }
+
+        List<int> aliveTeams = GetAliveTeams ();
+        if (aliveTeams.Count == 0) {
+            UnityEngine.Debug.Log ("Everyone Dead");
+            _postCombatString = "Everyone has died, Hamlet.";
+            _combatPhase = CombatPhase.POST_COMBAT;
+            return;
+        } else if (aliveTeams.Count == 1) {
+            UnityEngine.Debug.LogFormat ("Team {0} wins", aliveTeams [0]);
+            if (aliveTeams [0] == 0) {
+                _postCombatString = "You Win!";
+            } else {
+                _postCombatString = "You have been defeated";
+            }
+            _combatPhase = CombatPhase.POST_COMBAT;
+            _winTally [aliveTeams [0]]++;
+            return;
+        }
+
+        if (_currentOrder == null) {
+            GenerateOrder (deltaSeconds);
+        }
+
+        if (_currentOrder == null) {
+            // waiting for order
+            return;
+        }
+
+        _currentOrder.GetCombatUnit ().SetLastTurnMoved (_currentTurnNumber);
+
+        _currentOrder.Update (deltaSeconds);
+        if (_currentOrder.IsDone ()) {
+            // order is done
+            MaybeAdvanceCurrentTurn ();
+            _currentOrder = null;
+        }
+    }
 
         private void MaybeAdvanceCurrentTurn ()
         {
@@ -214,7 +248,9 @@ namespace MicroTwenty
                 }
             }
             ++_currentTurnNumber;
-            Debug.LogFormat ("Combat Turn Number {0}", _currentTurnNumber);
+            var turnMsg = string.Format("Combat Turn Number {0}", _currentTurnNumber);
+            Debug.Log (turnMsg);
+            AddLogLine (turnMsg);
         }
 
         public bool GetIsDone ()
@@ -258,7 +294,6 @@ namespace MicroTwenty
                 var offY = 14;
                 TextureDrawing.DrawRect (_mapManager.GetTargetTexture (), px+offX, py+offY, 10, 3, UnityEngine.Color.black, UnityEngine.Color.black, true, false);
                 var hpBar = Math.Max((8 * unit.currentHP) / unit.maxHP, 1);
-                //UnityEngine.Debug.LogFormat ("drawing hp {0}/{1} = {2}", unit.currentHP, unit.maxHP, hpBar);
                 TextureDrawing.DrawRect (_mapManager.GetTargetTexture (), px+offX+1, py+offY+1, hpBar, 1, UnityEngine.Color.green, UnityEngine.Color.black, true, false);
             }
 
@@ -270,6 +305,8 @@ namespace MicroTwenty
                 DrawPreBattle ();
             } else if (_combatPhase == CombatPhase.POST_COMBAT) {
                 DrawPostBattle ();
+            } else {
+                DrawLog ();
             }
         }
 
@@ -295,6 +332,35 @@ namespace MicroTwenty
 
             TextureDrawing.DrawRect (targetTexture, msgPosX - 2, msgPosY - 1, msgWidth, msgHeight, Color.black, Color.green, true, true);
             TextureDrawing.DrawStringAt (targetTexture, fontBitmap, msg, msgPosX, msgPosY, Color.white);
+        }
+
+        private void DrawLog ()
+        {
+            var targetTexture = _mapManager.GetTargetTexture ();
+
+            var targetTextureHeight = targetTexture.height;
+            var targetTextureWidth = targetTexture.width;
+
+            var msgWidth = LOG_LINE_MAX_LENGTH * 6 + 4;
+            var msgHeight = LOG_LINE_MAX_LINES * 8 + 4;
+
+            var msgPosX = targetTextureHeight - msgWidth;
+            var msgPosY = 0;
+
+            var fontBitmap = _mapManager.GetFontBitmap ();
+
+            var bgColor = new Color (0, 0, 0, 0.5f);
+
+            TextureDrawing.DrawRect (targetTexture, msgPosX - 2, msgPosY - 1, msgWidth, msgHeight, bgColor, Color.yellow, true, true);
+
+            // draw lines of the log here
+            for (int logIndex = _logLines.Count - 1; logIndex >= 0; --logIndex) {
+                var logMsg = _logLines [logIndex];
+
+                var linesUp = _logLines.Count - 1 - logIndex;
+
+                TextureDrawing.DrawStringAt (targetTexture, fontBitmap, logMsg, msgPosX + 2, msgPosY + linesUp * 8 + 2, Color.white);
+            }
         }
 
         private void DrawPostBattle ()
@@ -353,7 +419,7 @@ namespace MicroTwenty
                         _currentOrder = action.GetCombatOrder (_mapManager, _mapManager.GetHexMap ());
                     } else {
                         Debug.LogWarning ("null order returned from minimax");
-
+                        AddLogLine ("(?!) Null Order from minimax");
                         var wr = MakeWorldRep (_mapManager);
                         var movingUnitIndex = wr.GetIndexOfMovingUnit ();
                         var movingUnit = units [movingUnitIndex];
@@ -435,12 +501,9 @@ namespace MicroTwenty
         private void GenerateRetreatOrder (CombatUnit combatant)
         {
             var startCoord = combatant.GetHexCoord ();
-            //UnityEngine.Debug.LogFormat ("start coord {0} {1} {2}", startCoord.x, startCoord.y, startCoord.z);
 
             var locs = HexCoord.GetAtRangeFromLoc (1, startCoord).FindAll (IsLocationWalkable);
             BdgRandom.ShuffleList<HexCoord> (locs);
-
-            //UnityEngine.Debug.LogFormat ("found {0} locations", locs.Count);
 
             if (locs.Count == 0) {
                 _currentOrder = new PassOrder (combatant);
@@ -476,8 +539,6 @@ namespace MicroTwenty
                     _currentOrder = new PassOrder (combatant);
                     return;
                 }
-                //var locIndex = UnityEngine.Random.Range (0, locs.Count);
-                //var destCoord = locs [locIndex];
                 var destCoord = bestLoc;
                 _currentOrder = new CombatMoveOrder (_mapManager, _mapManager.GetHexMap (), destCoord, combatant);
             }
@@ -565,7 +626,6 @@ namespace MicroTwenty
                     if ((!distances.ContainsKey (neighbor)) ||
                         (distances [neighbor] > newDist)) {
                         distances [neighbor] = newDist;
-                        //UnityEngine.Debug.LogFormat ("Flood filling loc {0} to dist {1}", neighbor, newDist);
                         openList.Add (neighbor);
                     }
                 }

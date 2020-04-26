@@ -19,7 +19,7 @@ namespace MicroTwenty
 
             _elapsedTime = 0.0f;
 
-            Debug.LogFormat ("{0} attacks {1} with {2}",
+            mapMgr.GetCombatMgr ().AddLogLineFormat ("{0} attacks {1} with {2}",
                 _attacker.unitName, _target.unitName, attacker.weapon.Name);
 
             var successRange = 1.0f;
@@ -31,24 +31,23 @@ namespace MicroTwenty
 
             if (hit) {
                 var roll = _attacker.weapon.RollDamage ();
-                Debug.LogFormat ("{0} rolls {1} damage",
+                mapMgr.GetCombatMgr ().AddLogLineFormat("{0} rolls {1} damage",
                     _attacker.unitName, roll);
 
-                // TODO use armor damage reduction
-
+                // use armor damage reduction
                 var passThrough = Math.Max(0, roll - _target.armor.DamageReduction);
 
                 if (passThrough != roll) {
-                    Debug.LogFormat ("reduced to {0}", passThrough);
+                    mapMgr.GetCombatMgr ().AddLogLineFormat ("reduced to {0}", passThrough);
                 }
 
                 if (passThrough > 0) {
                     _target.currentHP -= passThrough;
-                    Debug.LogFormat ("{0} new HP {1}/{2}",
+                    mapMgr.GetCombatMgr ().AddLogLineFormat ("{0} new HP {1}/{2}",
                         _target.unitName, _target.currentHP, _target.maxHP);
                 }
             } else {
-                Debug.LogFormat ("bounces off {0}'s {1}", _target.unitName, _target.armor.Name);
+                mapMgr.GetCombatMgr ().AddLogLineFormat ("bounces off {0}'s {1}", _target.unitName, _target.armor.Name);
             }
 
         }

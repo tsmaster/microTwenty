@@ -34,17 +34,25 @@ namespace MicroTwenty
                 return;
             }
 
-
             var texWidth = targetTexture.width;
             var texHeight = targetTexture.height;
 
             if (fill) {
-                //var bits = targetTexture.GetPixels (left, top, width, height);
                 Color [] bits = new Color [width * height];
-                for (int i = 0; i < bits.Length; ++i) {
-                    bits [i] = fillColor;
-                    // todo support 1 bit alpha
-                    // todo support 8 bit alpha
+
+                if (fillColor.a <= 254.0f / 255.0f) {
+                    var a = fillColor.a;
+                    var oma = 1.0f - a; // one minus a
+
+                    bits = targetTexture.GetPixels (left, top, width, height);
+
+                    for (int i = 0; i < bits.Length; ++i) {
+                        bits [i] = oma * bits [i] + a * fillColor;
+                    }
+                } else {
+                    for (int i = 0; i < bits.Length; ++i) {
+                        bits [i] = fillColor;
+                    }
                 }
                 targetTexture.SetPixels (left, top, width, height, bits);
             }
