@@ -35,8 +35,9 @@ namespace MicroTwenty
         {
             var md = MOVE_DURATION;
 
-            // HACK for debugging
-            md = 0.01f;
+            if (StaticSettings.IS_SOAKING_COMBAT) {
+                md = 0.01f;
+            }
 
             if (UnityEngine.Input.GetKey (UnityEngine.KeyCode.LeftShift)) {
                 md = 0.05f;

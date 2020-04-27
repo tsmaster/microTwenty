@@ -368,20 +368,21 @@ namespace MicroTwenty
                 }
             }
 
-            /// HACK HACK HACK just for debugging, soak
-            if ((_combatMgr == null) ||
+            if (StaticSettings.IS_SOAKING_COMBAT) {
+                if ((_combatMgr == null) ||
                 (!_combatMgr.InCombat)) {
-                var combatMapIndex = Random.Range (0, 4);
+                    var combatMapIndex = Random.Range (0, 4);
 
-                string [] combatMaps = new string [] {
+                    string [] combatMaps = new string [] {
                     "combat",
                     "bigcombat",
                     "combat_foyer",
                     "combat_hall"
                 };
 
-                var combatMapName = combatMaps [combatMapIndex];
-                _gameMgr.AddCommand (new CombatCommand ("soak combat", _gameMgr, combatMapName, new HexCoord (0, 0, 0)));
+                    var combatMapName = combatMaps [combatMapIndex];
+                    _gameMgr.AddCommand (new CombatCommand ("soak combat", _gameMgr, combatMapName, new HexCoord (0, 0, 0)));
+                }
             }
 
             if (!drawn) {
@@ -792,7 +793,7 @@ namespace MicroTwenty
                     Color c = team == 0 ? Color.cyan : Color.red;
                     DrawTintedSpriteAtLocation (combObj.GetSpriteId (), dynobj.hexCoord, c);
                 } else {
-                    // HACK HACK HACK
+                    // TODO clean this up - draw a player party sprite except in combat
                     if ((_combatMgr == null) ||
                         (!_combatMgr.InCombat)) {
                         DrawSpriteAtLoc (dynobj.objectType, dynobj.hexCoord, dynobj);

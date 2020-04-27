@@ -170,7 +170,7 @@ namespace MicroTwenty
                 openList.RemoveAt (0);
                 var curDist = outDict [pos];
                 var newDist = curDist + 1;
-                // HACK HACK HACK
+                // TODO reconsider distance calculations for performance
                 //if (newDist > maxDistance) {
                     //continue;
                 //}

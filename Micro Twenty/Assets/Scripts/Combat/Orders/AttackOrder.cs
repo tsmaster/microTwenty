@@ -71,8 +71,9 @@ namespace MicroTwenty
                 dt = 0.09f;
             }
 
-            // HACK HACK HACK
-            dt = 0.15f;
+            if (StaticSettings.IS_SOAKING_COMBAT) {
+                dt = 0.15f;
+            }
 
             return _elapsedTime >= dt;
         }
