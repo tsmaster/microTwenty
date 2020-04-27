@@ -56,10 +56,11 @@ namespace MicroTwenty
 
     public enum ScreenId
     {
+        NoIntroGameScreen,
         BigDiceGamesScreen,
         TitleScreen,
         CreditsScreen,
-        MenuScreen
+        MenuScreen,
     };
 
     public class MapManager : MonoBehaviour
@@ -970,12 +971,14 @@ namespace MicroTwenty
                 break;
 
             case ScreenId.MenuScreen:
-                //_introScreen = new BigDiceGamesScreen (this);
-                _introScreen = null;
+                _introScreen = new MainMenuScreen (this, microTwentyTexture);
                 break;
 
             case ScreenId.CreditsScreen:
-                //_introScreen = new BigDiceGamesScreen (this);
+                _introScreen = new CreditsScreen (this);
+                break;
+
+            case ScreenId.NoIntroGameScreen:
                 _introScreen = null;
                 break;
             }
