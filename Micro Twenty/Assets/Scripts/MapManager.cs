@@ -302,6 +302,11 @@ namespace MicroTwenty
             return fontBitmap;
         }
 
+        internal Texture2D GetMenuBitmap ()
+        {
+            return menuBitmap;
+        }
+
         internal Texture2D GetTargetTexture ()
         {
             return targetTexture;
@@ -396,29 +401,33 @@ namespace MicroTwenty
 
             // Movement
 
-            if (Input.GetKeyDown (KeyCode.D)) {
-                // go east
-                tryMove (new HexCoord (1, -1, 0));
-            }
-            if (Input.GetKeyDown (KeyCode.E)) {
-                // go northeast
-                tryMove (new HexCoord (1, 0, -1));
-            }
-            if (Input.GetKeyDown (KeyCode.W)) {
-                // go northwest
-                tryMove (new HexCoord (0, 1, -1));
-            }
-            if (Input.GetKeyDown (KeyCode.A)) {
-                // go west
-                tryMove (new HexCoord (-1, 1, 0));
-            }
-            if (Input.GetKeyDown (KeyCode.Z)) {
-                // go southwest
-                tryMove (new HexCoord (-1, 0, 1));
-            }
-            if (Input.GetKeyDown (KeyCode.X)) {
-                // go southeast
-                tryMove (new HexCoord (0, -1, 1));
+            if ((_combatMgr == null) ||
+                (!_combatMgr.InCombat)) {
+
+                if (Input.GetKeyDown (KeyCode.D)) {
+                    // go east
+                    tryMove (new HexCoord (1, -1, 0));
+                }
+                if (Input.GetKeyDown (KeyCode.E)) {
+                    // go northeast
+                    tryMove (new HexCoord (1, 0, -1));
+                }
+                if (Input.GetKeyDown (KeyCode.W)) {
+                    // go northwest
+                    tryMove (new HexCoord (0, 1, -1));
+                }
+                if (Input.GetKeyDown (KeyCode.A)) {
+                    // go west
+                    tryMove (new HexCoord (-1, 1, 0));
+                }
+                if (Input.GetKeyDown (KeyCode.Z)) {
+                    // go southwest
+                    tryMove (new HexCoord (-1, 0, 1));
+                }
+                if (Input.GetKeyDown (KeyCode.X)) {
+                    // go southeast
+                    tryMove (new HexCoord (0, -1, 1));
+                }
             }
 
             // Menu
@@ -426,104 +435,107 @@ namespace MicroTwenty
                 // show menu
                 ShowMenu ();
             }
-            if (Input.GetKeyDown (KeyCode.UpArrow)) {
-                // show menu
-                _menuMgr.OnUp ();
-            }
-            if (Input.GetKeyDown (KeyCode.DownArrow)) {
-                // show menu
-                _menuMgr.OnDown ();
-            }
-            if (Input.GetKeyDown (KeyCode.LeftArrow)) {
-                // show menu
-                _menuMgr.OnLeft ();
-            }
-            if (Input.GetKeyDown (KeyCode.RightArrow)) {
-                // show menu
-                _menuMgr.OnRight ();
-            }
-            if ((Input.GetKeyDown (KeyCode.Space)) ||
-                (Input.GetKeyDown (KeyCode.Return)) ||
-                (Input.GetButtonDown("Submit"))) {
 
-                var result = _menuMgr.OnActivate ();
-                if (result != null) {
-                    var resId = result.GetItemId ();
-                    switch (resId) {
-                    case 1000:
-                        // teleport to EP_1
-                        _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "ep_1", new HexCoord(0,0,0)));
-                        break;
-                    case 1001:
-                        // teleport to EP_2
-                        _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "ep_2", new HexCoord (1, 2, -3)));
-                        break;
-                    case 1002:
-                        // teleport to EP_3
-                        _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "ep_3", new HexCoord (0, 0, 0)));
-                        break;
-                    case 1003:
-                        // teleport to EP_4
-                        _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "ep_4", new HexCoord (0, 0, 0)));
-                        break;
-                    case 1004:
-                        // teleport to EP_5
-                        _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "ep_5", new HexCoord (0, 0, 0)));
-                        break;
-                    case 1005:
-                        // teleport to EP_6
-                        _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "ep_6", new HexCoord (0, 0, 0)));
-                        break;
-                    case 1010:
-                        // teleport to combat
-                        _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "combat", new HexCoord (0, 0, 0)));
-                        break;
-                    case 1011:
-                        // teleport to bigcombat
-                        _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "bigcombat", new HexCoord (0, 0, 0)));
-                        break;
-                    case 2001:
-                        // teleport to caverns
-                        _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "caverns", new HexCoord (0, 0, 0)));
-                        break;
-                    case 2002:
-                        // teleport to docks
-                        _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "docks", new HexCoord (-4, 4, 0)));
-                        break;
-                    case 2003:
-                        // teleport to labyrinth
-                        _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "labyrinth", new HexCoord (0, 0, 0)));
-                        break;
-                    case 2004:
-                        // teleport to river crossing
-                        _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "river_crossing", new HexCoord (-1, 1, 0)));
-                        break;
-                    case 2005:
-                        // teleport to town
-                        _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "town", new HexCoord (-1, 1, 0)));
-                        break;
-                    case 3001:
-                        // teleport to Rycroft
-                        _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "ep1c_rycroft", new HexCoord (-1, 1, 0)));
-                        break;
-                    case 3002:
-                        // teleport to rat hole
-                        _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "ep1d_rathole", new HexCoord (-1, 1, 0)));
-                        break;
-                    case 3003:
-                        // teleport to rat island
-                        _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "ratisland", new HexCoord (0, 0, 0)));
-                        break;
-                    default:
-                        Debug.Log ("Got unknown ID: " + resId);
-                        break;
+            if (_menuMgr.IsOpen ()) {
+                if (Input.GetKeyDown (KeyCode.UpArrow)) {
+                    // show menu
+                    _menuMgr.OnUp ();
+                }
+                if (Input.GetKeyDown (KeyCode.DownArrow)) {
+                    // show menu
+                    _menuMgr.OnDown ();
+                }
+                if (Input.GetKeyDown (KeyCode.LeftArrow)) {
+                    // show menu
+                    _menuMgr.OnLeft ();
+                }
+                if (Input.GetKeyDown (KeyCode.RightArrow)) {
+                    // show menu
+                    _menuMgr.OnRight ();
+                }
+                if ((Input.GetKeyDown (KeyCode.Space)) ||
+                    (Input.GetKeyDown (KeyCode.Return)) ||
+                    (Input.GetButtonDown ("Submit"))) {
+
+                    var result = _menuMgr.OnActivate ();
+                    if (result != null) {
+                        var resId = result.GetItemId ();
+                        switch (resId) {
+                        case 1000:
+                            // teleport to EP_1
+                            _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "ep_1", new HexCoord (0, 0, 0)));
+                            break;
+                        case 1001:
+                            // teleport to EP_2
+                            _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "ep_2", new HexCoord (1, 2, -3)));
+                            break;
+                        case 1002:
+                            // teleport to EP_3
+                            _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "ep_3", new HexCoord (0, 0, 0)));
+                            break;
+                        case 1003:
+                            // teleport to EP_4
+                            _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "ep_4", new HexCoord (0, 0, 0)));
+                            break;
+                        case 1004:
+                            // teleport to EP_5
+                            _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "ep_5", new HexCoord (0, 0, 0)));
+                            break;
+                        case 1005:
+                            // teleport to EP_6
+                            _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "ep_6", new HexCoord (0, 0, 0)));
+                            break;
+                        case 1010:
+                            // teleport to combat
+                            _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "combat", new HexCoord (0, 0, 0)));
+                            break;
+                        case 1011:
+                            // teleport to bigcombat
+                            _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "bigcombat", new HexCoord (0, 0, 0)));
+                            break;
+                        case 2001:
+                            // teleport to caverns
+                            _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "caverns", new HexCoord (0, 0, 0)));
+                            break;
+                        case 2002:
+                            // teleport to docks
+                            _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "docks", new HexCoord (-4, 4, 0)));
+                            break;
+                        case 2003:
+                            // teleport to labyrinth
+                            _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "labyrinth", new HexCoord (0, 0, 0)));
+                            break;
+                        case 2004:
+                            // teleport to river crossing
+                            _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "river_crossing", new HexCoord (-1, 1, 0)));
+                            break;
+                        case 2005:
+                            // teleport to town
+                            _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "town", new HexCoord (-1, 1, 0)));
+                            break;
+                        case 3001:
+                            // teleport to Rycroft
+                            _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "ep1c_rycroft", new HexCoord (-1, 1, 0)));
+                            break;
+                        case 3002:
+                            // teleport to rat hole
+                            _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "ep1d_rathole", new HexCoord (-1, 1, 0)));
+                            break;
+                        case 3003:
+                            // teleport to rat island
+                            _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "ratisland", new HexCoord (0, 0, 0)));
+                            break;
+                        default:
+                            Debug.Log ("Got unknown ID: " + resId);
+                            break;
+                        }
                     }
                 }
-            }
-            if ((Input.GetKeyDown (KeyCode.Escape)) ||
-                (Input.GetButtonDown("Cancel"))) {
-                // show menu
-                _menuMgr.OnBack ();
+                if ((Input.GetKeyDown (KeyCode.Escape)) ||
+                    (Input.GetButtonDown ("Cancel"))) {
+                    // show menu
+                    _menuMgr.OnBack ();
+                }
             }
 
             if (_menuMgr.IsOpen ()) {

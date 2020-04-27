@@ -19,6 +19,8 @@ namespace MicroTwenty
 
         private List<string> _logLines;
 
+        private MenuObject _combatMenu;
+
         public bool InCombat {
             get { return _inCombat; }
             set {
@@ -38,13 +40,38 @@ namespace MicroTwenty
             COMBAT_DONE
         };
 
+        private enum OrderUiPhase
+        {
+            INVALID,
+            SHOWING_MENU,
+            CURSOR,
+            EXECUTING
+        };
+
+        private enum OrderMenuItemId
+        {
+            INVALID,
+            MOVE,
+            MELEE,
+            RANGE,
+            MAGIC,
+            ITEM,
+            DEFEND
+        };
+
         private CombatPhase _combatPhase;
 
         Dictionary<int, int> _winTally;
+
         private string _preCombatString;
         private string _postCombatString;
         private float _preBattleClock;
         private float _postBattleClock;
+        private OrderUiPhase _orderUiPhase;
+        private bool _showingCombatMenu;
+        private MenuManager _menuMgr;
+        private Texture2D _targetTexture;
+        private SelectionMode _selector;
 
         public Dictionary<int, int> WinTally { 
             get { return _winTally; }
@@ -74,6 +101,27 @@ namespace MicroTwenty
             };
 
             _logLines = new List<string> ();
+
+
+            var menuBitmap = mapManager.GetMenuBitmap ();
+            var fontBitmap = mapManager.GetFontBitmap ();
+            _targetTexture = mapManager.GetTargetTexture ();
+
+            _menuMgr = new MenuManager (menuBitmap, fontBitmap);
+            _combatMenu = new MenuObject ("combat", menuBitmap, fontBitmap);
+            _combatMenu.SetWindow (1, 4);
+            _combatMenu.AddItem ("Move").SetItemId((int)OrderMenuItemId.MOVE);
+            _combatMenu.AddItem ("Melee Attack").SetItemId ((int)OrderMenuItemId.MELEE);
+            _combatMenu.AddItem ("Ranged Attack").SetEnabled(false).SetItemId ((int)OrderMenuItemId.RANGE);
+            _combatMenu.AddItem ("Cast Magic").SetEnabled(false).SetItemId ((int)OrderMenuItemId.MAGIC);
+            _combatMenu.AddItem ("Use Item").SetEnabled (false).SetItemId ((int)OrderMenuItemId.ITEM);
+            _combatMenu.AddItem ("Defend").SetItemId ((int)OrderMenuItemId.DEFEND);
+
+            _combatMenu.Build ();
+
+            _orderUiPhase = OrderUiPhase.INVALID;
+
+            _selector = null;
         }
 
         internal void AddLogLineFormat (string templ, params object [] parList)
@@ -103,8 +151,8 @@ namespace MicroTwenty
             }
         }
 
-        private CombatUnit AddUnit (string name, HexCoord hexCoord, SpriteId spriteId, int teamId) {
-            var unit = new CombatUnit (name, hexCoord, teamId, new CombatantSprite(_gameMgr, hexCoord, spriteId, teamId));
+        private CombatUnit AddUnit (string name, HexCoord hexCoord, SpriteId spriteId, int teamId, int maxMove) {
+            var unit = new CombatUnit (name, hexCoord, teamId, new CombatantSprite(_gameMgr, hexCoord, spriteId, teamId), maxMove);
             units.Add (unit);
             return unit;
         }
@@ -133,26 +181,26 @@ namespace MicroTwenty
             var t0Starts = HexCoord.GetWithinRangeFromLoc (2, sl0).FindAll (IsLocationWalkable);
             BdgRandom.ShuffleList<HexCoord> (t0Starts);
 
-            AddUnit ("Stan", t0Starts[0], SpriteId.SPRITE_COMBAT_GUY_1, 0).AddWeapon(WeaponRep.MakeSword()).AddArmor(ArmorRep.MakeLeatherArmor());
-            AddUnit ("Kim", t0Starts [1], SpriteId.SPRITE_COMBAT_GUY_2, 0).AddWeapon (WeaponRep.MakeSword ()).AddArmor (ArmorRep.MakeLeatherArmor ());
-            AddUnit ("Flexo", t0Starts [2], SpriteId.SPRITE_COMBAT_GUY_3, 0).AddWeapon (WeaponRep.MakeSword ()).AddArmor (ArmorRep.MakeLeatherArmor ());
-            AddUnit ("Mags", t0Starts [3], SpriteId.SPRITE_COMBAT_GUY_4, 0).AddWeapon (WeaponRep.MakeStaff ()).AddArmor (ArmorRep.MakeClothArmor ());
-            AddUnit ("Torso", t0Starts [4], SpriteId.SPRITE_COMBAT_GUY_5, 0).AddWeapon (WeaponRep.MakeSword ()).AddArmor (ArmorRep.MakePlateArmor ());
-            AddUnit ("Belto", t0Starts [5], SpriteId.SPRITE_COMBAT_GUY_6, 0).AddWeapon (WeaponRep.MakeSword ()).AddArmor (ArmorRep.MakeChainArmor ());
+            AddUnit ("Stan", t0Starts[0], SpriteId.SPRITE_COMBAT_GUY_1, 0, 3).AddWeapon(WeaponRep.MakeSword()).AddArmor(ArmorRep.MakeLeatherArmor());
+            AddUnit ("Kim", t0Starts [1], SpriteId.SPRITE_COMBAT_GUY_2, 0, 3).AddWeapon (WeaponRep.MakeSword ()).AddArmor (ArmorRep.MakeLeatherArmor ());
+            AddUnit ("Flexo", t0Starts [2], SpriteId.SPRITE_COMBAT_GUY_3, 0, 2).AddWeapon (WeaponRep.MakeSword ()).AddArmor (ArmorRep.MakeLeatherArmor ());
+            AddUnit ("Mags", t0Starts [3], SpriteId.SPRITE_COMBAT_GUY_4, 0, 3).AddWeapon (WeaponRep.MakeStaff ()).AddArmor (ArmorRep.MakeClothArmor ());
+            AddUnit ("Torso", t0Starts [4], SpriteId.SPRITE_COMBAT_GUY_5, 0, 2).AddWeapon (WeaponRep.MakeSword ()).AddArmor (ArmorRep.MakePlateArmor ());
+            AddUnit ("Belto", t0Starts [5], SpriteId.SPRITE_COMBAT_GUY_6, 0, 2).AddWeapon (WeaponRep.MakeSword ()).AddArmor (ArmorRep.MakeChainArmor ());
 
             var t1Starts = HexCoord.GetWithinRangeFromLoc (2, sl1).FindAll (IsLocationWalkable);
             BdgRandom.ShuffleList<HexCoord> (t1Starts);
 
-            AddUnit ("Snake", t1Starts [0], SpriteId.SPRITE_COMBAT_SNAKE, 1).AddWeapon(WeaponRep.MakeBiteWeapon ());
-            AddUnit ("Dog",   t1Starts [1], SpriteId.SPRITE_COMBAT_DOG, 1).AddWeapon (WeaponRep.MakeBiteWeapon ());
-            AddUnit ("Ratman", t1Starts [2], SpriteId.SPRITE_COMBAT_RAT_MAN, 1).AddWeapon (WeaponRep.MakeSword ());
-            AddUnit ("Crab",  t1Starts [3], SpriteId.SPRITE_COMBAT_CRAB, 1).AddWeapon (WeaponRep.MakeBiteWeapon ()); 
-            AddUnit ("Ghost", t1Starts [4], SpriteId.SPRITE_COMBAT_GHOST, 1).AddWeapon (WeaponRep.MakePsiWeapon ()); 
-            AddUnit ("Djinn", t1Starts [5], SpriteId.SPRITE_COMBAT_DJINN, 1).AddWeapon (WeaponRep.MakePsiWeapon ());
-            AddUnit ("Cat",   t1Starts [6], SpriteId.SPRITE_COMBAT_CAT, 1).AddWeapon (WeaponRep.MakeBiteWeapon ());
-            AddUnit ("Skeleton", t1Starts [7], SpriteId.SPRITE_COMBAT_SKELETON, 1).AddWeapon (WeaponRep.MakeSword ()); 
-            AddUnit ("Staff", t1Starts [8], SpriteId.SPRITE_COMBAT_STAFF, 1).AddWeapon (WeaponRep.MakeStaff ());
-            AddUnit ("Bug", t1Starts [9], SpriteId.SPRITE_COMBAT_BUG, 1).AddWeapon (WeaponRep.MakeBiteWeapon ());
+            AddUnit ("Snake", t1Starts [0], SpriteId.SPRITE_COMBAT_SNAKE, 1, 3).AddWeapon(WeaponRep.MakeBiteWeapon ());
+            AddUnit ("Dog",   t1Starts [1], SpriteId.SPRITE_COMBAT_DOG, 1, 3).AddWeapon (WeaponRep.MakeBiteWeapon ());
+            AddUnit ("Ratman", t1Starts [2], SpriteId.SPRITE_COMBAT_RAT_MAN, 1, 3).AddWeapon (WeaponRep.MakeSword ());
+            AddUnit ("Crab",  t1Starts [3], SpriteId.SPRITE_COMBAT_CRAB, 1, 2).AddWeapon (WeaponRep.MakeBiteWeapon ()); 
+            AddUnit ("Ghost", t1Starts [4], SpriteId.SPRITE_COMBAT_GHOST, 1, 2).AddWeapon (WeaponRep.MakePsiWeapon ()); 
+            AddUnit ("Djinn", t1Starts [5], SpriteId.SPRITE_COMBAT_DJINN, 1, 2).AddWeapon (WeaponRep.MakePsiWeapon ());
+            AddUnit ("Cat",   t1Starts [6], SpriteId.SPRITE_COMBAT_CAT, 1, 3).AddWeapon (WeaponRep.MakeBiteWeapon ());
+            AddUnit ("Skeleton", t1Starts [7], SpriteId.SPRITE_COMBAT_SKELETON, 1, 3).AddWeapon (WeaponRep.MakeSword ()); 
+            AddUnit ("Staff", t1Starts [8], SpriteId.SPRITE_COMBAT_STAFF, 1, 3).AddWeapon (WeaponRep.MakeStaff ());
+            AddUnit ("Bug", t1Starts [9], SpriteId.SPRITE_COMBAT_BUG, 1, 3).AddWeapon (WeaponRep.MakeBiteWeapon ());
 
             //AddUnit ("Snake", new HexCoord (-3, 0, 3), SpriteId.SPRITE_COMBAT_SNAKE, 1);
             //AddUnit ("Snake", new HexCoord (-3, 3, 0), SpriteId.SPRITE_COMBAT_SNAKE, 1);
@@ -190,54 +238,229 @@ namespace MicroTwenty
             _combatPhase = CombatPhase.PRE_COMBAT;
             _preBattleClock = 0.0f;
             _postBattleClock = 0.0f;
-    }
-
-    public void Update (float deltaSeconds) {
-        switch (_combatPhase) {
-        case CombatPhase.PRE_COMBAT:
-            UpdatePreBattle (deltaSeconds);
-            return;
-        case CombatPhase.POST_COMBAT:
-            UpdatePostBattle (deltaSeconds);
-            return;
         }
 
-        List<int> aliveTeams = GetAliveTeams ();
-        if (aliveTeams.Count == 0) {
-            UnityEngine.Debug.Log ("Everyone Dead");
-            _postCombatString = "Everyone has died, Hamlet.";
-            _combatPhase = CombatPhase.POST_COMBAT;
-            return;
-        } else if (aliveTeams.Count == 1) {
-            UnityEngine.Debug.LogFormat ("Team {0} wins", aliveTeams [0]);
-            if (aliveTeams [0] == 0) {
-                _postCombatString = "You Win!";
-            } else {
-                _postCombatString = "You have been defeated";
+        public void Update (float deltaSeconds) {
+            switch (_combatPhase) {
+            case CombatPhase.PRE_COMBAT:
+                UpdatePreBattle (deltaSeconds);
+                return;
+            case CombatPhase.POST_COMBAT:
+                UpdatePostBattle (deltaSeconds);
+                return;
             }
-            _combatPhase = CombatPhase.POST_COMBAT;
-            _winTally [aliveTeams [0]]++;
-            return;
+
+            List<int> aliveTeams = GetAliveTeams ();
+            if (aliveTeams.Count == 0) {
+                UnityEngine.Debug.Log ("Everyone Dead");
+                _postCombatString = "Everyone has died, Hamlet.";
+                _combatPhase = CombatPhase.POST_COMBAT;
+                return;
+            } else if (aliveTeams.Count == 1) {
+                UnityEngine.Debug.LogFormat ("Team {0} wins", aliveTeams [0]);
+                if (aliveTeams [0] == 0) {
+                    _postCombatString = "You Win!";
+                } else {
+                    _postCombatString = "You have been defeated";
+                }
+                _combatPhase = CombatPhase.POST_COMBAT;
+                _winTally [aliveTeams [0]]++;
+                return;
+            }
+
+            int nextUnitIndex = GetNextUnitIndex ();
+
+            int team = units [nextUnitIndex].GetTeamID ();
+
+            if (IsTeamAi (team)) {
+                if (_currentOrder == null) {
+                    GenerateOrder (deltaSeconds);
+                }
+
+                if (_currentOrder == null) {
+                    // waiting for order
+                    return;
+                }
+            } else {
+                switch (_orderUiPhase) {
+                case OrderUiPhase.INVALID:
+                    _orderUiPhase = OrderUiPhase.SHOWING_MENU;
+                    _showingCombatMenu = true;
+                    _menuMgr.OpenMenu (_combatMenu);
+                    break;
+                case OrderUiPhase.SHOWING_MENU:
+                    UpdateCombatMenu ();
+                    // selections from the order menu (e.g. "move" "attack") go
+                    // through a callback that sets the phase and tears down the menu.
+                    break;
+                case OrderUiPhase.CURSOR:
+                    UpdateCursor ();
+                    // selections from the cursor menu (e.g. move here, cancel) go
+                    // through a callback that generates the _currentOrder
+                    break;
+                case OrderUiPhase.EXECUTING:
+                    // do nothing
+                    break;
+                }
+            }
+
+            if (_currentOrder != null) {
+                _currentOrder.GetCombatUnit ().SetLastTurnMoved (_currentTurnNumber);
+
+                _currentOrder.Update (deltaSeconds);
+                if (_currentOrder.IsDone ()) {
+                    // order is done
+                    _orderUiPhase = OrderUiPhase.INVALID;
+                    MaybeAdvanceCurrentTurn ();
+                    _currentOrder = null;
+                }
+            }
         }
 
-        if (_currentOrder == null) {
-            GenerateOrder (deltaSeconds);
+        private bool IsTeamAi (int teamIndex)
+        {
+            return (teamIndex == 1);
         }
 
-        if (_currentOrder == null) {
-            // waiting for order
-            return;
+        private void UpdateCursor ()
+        {
+            // move cursor
+            if (Input.GetKeyDown (KeyCode.W)) {
+                // NW
+                _selector.CursorPos = _selector.CursorPos.Add(new HexCoord (0, 1, -1));
+            }
+            if (Input.GetKeyDown (KeyCode.E)) {
+                // NE
+                _selector.CursorPos = _selector.CursorPos.Add (new HexCoord (1, 0, -1));
+            }
+            if (Input.GetKeyDown (KeyCode.A)) {
+                // W
+                _selector.CursorPos = _selector.CursorPos.Add (new HexCoord (-1, 1, 0));
+            }
+            if (Input.GetKeyDown (KeyCode.D)) {
+                // E
+                _selector.CursorPos = _selector.CursorPos.Add (new HexCoord (1, -1, 0));
+            }
+            if (Input.GetKeyDown (KeyCode.Z)) {
+                // SW
+                _selector.CursorPos = _selector.CursorPos.Add (new HexCoord (-1, 0, 1));
+            }
+            if (Input.GetKeyDown (KeyCode.X)) {
+                // SE
+                _selector.CursorPos = _selector.CursorPos.Add (new HexCoord (0, -1, 1));
+            }
+
+            // if selected a valid unit, callback
+            if ((Input.GetKeyDown (KeyCode.Return)) ||
+                (Input.GetKeyDown(KeyCode.Space))) {
+                if (_selector.IsLocationSelectable (_selector.CursorPos)) {
+                    _selector.OnLocationSelected (_selector.CursorPos);
+                }
+            }
+
+            // if cancel, have to unwind
+            if (Input.GetKeyDown (KeyCode.Escape)) {
+                _selector = null;
+                _orderUiPhase = OrderUiPhase.SHOWING_MENU;
+                _menuMgr.OpenMenu (_combatMenu);
+            }
         }
 
-        _currentOrder.GetCombatUnit ().SetLastTurnMoved (_currentTurnNumber);
+        private void UpdateCombatMenu ()
+        {
+            // TODO this doesn't seem like a thing we want to rewrite each place we use a menu
+            if (Input.GetKeyDown (KeyCode.DownArrow)) {
+                _menuMgr.OnDown ();
+            }
+            if (Input.GetKeyDown (KeyCode.UpArrow)) {
+                _menuMgr.OnUp ();
+            }
+            if (Input.GetKeyDown (KeyCode.LeftArrow)) {
+                _menuMgr.OnLeft ();
+            }
+            if (Input.GetKeyDown (KeyCode.RightArrow)) {
+                _menuMgr.OnRight ();
+            }
+            if (Input.GetKeyDown (KeyCode.Return)) {
+                var res = _menuMgr.OnActivate ();
 
-        _currentOrder.Update (deltaSeconds);
-        if (_currentOrder.IsDone ()) {
-            // order is done
-            MaybeAdvanceCurrentTurn ();
-            _currentOrder = null;
+                switch (res.GetItemId ()) {
+                case (int)OrderMenuItemId.MOVE:
+                    // move selected
+
+                    var nextCharIndex = GetNextUnitIndex ();
+                    var nextChar = units [nextCharIndex];
+
+                    var myLoc = nextChar.GetHexCoord ();
+                    var walkableDict = MakeWalkableDict ();
+                    walkableDict [myLoc] = true;
+
+                    var sources = new List<HexCoord> {
+                        myLoc };
+
+                    Dictionary<HexCoord, int> ff = MakeFloodFill (sources, walkableDict);
+                    _selector = new MovementSelectionMode (nextCharIndex, _mapManager, this, ff);
+                    _selector.OnLocationSelected += OnSelectedMoveDestination;
+                    _orderUiPhase = OrderUiPhase.CURSOR;
+                    break;
+                case (int)OrderMenuItemId.RANGE:
+                    // ranged attack selected
+                    // TODO select ranged target
+                    break;
+                case (int)OrderMenuItemId.MELEE:
+                    // melee attack selected
+                    _selector = new MeleeTargetSelectionMode (GetNextUnitIndex(), _mapManager, this);
+                    _selector.OnLocationSelected += OnSelectedMeleeTarget;
+                    _orderUiPhase = OrderUiPhase.CURSOR;
+                    break;
+                case (int)OrderMenuItemId.MAGIC:
+                    // magic selected
+                    break;
+                case (int)OrderMenuItemId.ITEM:
+                    // use item selected
+                    break;
+                case (int)OrderMenuItemId.DEFEND:
+                    // defend selected
+                    _currentOrder = new PassOrder (units [GetNextUnitIndex ()]);
+                    break;
+                default:
+                    // unknown action selected
+                    break;
+                }
+            }
+            if (Input.GetKeyDown (KeyCode.Escape)) {
+                // maybe don't allow this?
+                _menuMgr.OnBack ();
+            }
         }
-    }
+
+        private void OnSelectedMeleeTarget (HexCoord hc)
+        {
+            var nextUnitIndex = GetNextUnitIndex ();
+            var attacker = units [nextUnitIndex];
+            var target = GetCombatUnitByLocation (hc);
+            _currentOrder = new AttackOrder (_mapManager, attacker, target);
+        }
+
+        private CombatUnit GetCombatUnitByLocation (HexCoord hc)
+        {
+            foreach (var unit in units) {
+                if (!unit.IsAlive ()) {
+                    continue;
+                }
+                if (unit.GetHexCoord ().Equals (hc)) {
+                    return unit;
+                }
+            }
+            return null;
+        }
+
+        private void OnSelectedMoveDestination (HexCoord hc)
+        {
+            var nextUnitIndex = GetNextUnitIndex ();
+            var unit = units [nextUnitIndex];
+            _currentOrder = new CombatMoveOrder (_mapManager, _mapManager.GetHexMap (), hc, unit);
+        }
 
         private void MaybeAdvanceCurrentTurn ()
         {
@@ -307,7 +530,31 @@ namespace MicroTwenty
                 DrawPostBattle ();
             } else {
                 DrawLog ();
+
+                var movingUnitIndex = GetNextUnitIndex ();
+                var movingUnit = units [movingUnitIndex];
+                var movingUnitLoc = movingUnit.GetHexCoord ();
+
+                _mapManager.DrawTintedSpriteAtLocation (SpriteId.SPRITE_TILE_CURSOR_CIRCLE, movingUnitLoc, Color.white);
+
+                switch (_orderUiPhase) {
+                case OrderUiPhase.SHOWING_MENU:
+                    _menuMgr.Draw (_targetTexture, 10, 185);
+                    break;
+                case OrderUiPhase.CURSOR:
+                    DrawSelector ();
+                    break;
+                }
+                _targetTexture.Apply ();
             }
+        }
+
+        private void DrawSelector ()
+        {
+            var cursorLoc = _selector.CursorPos;
+            var sprite = _selector.GetCursorSpriteIdForLoc (cursorLoc, out Color spriteColor);
+
+            _mapManager.DrawTintedSpriteAtLocation (sprite, cursorLoc, spriteColor);
         }
 
         private void DrawPreBattle ()
@@ -390,6 +637,49 @@ namespace MicroTwenty
             return unit.currentHP >= (unit.maxHP / 2);
         }
 
+        private int GetNextUnitIndex ()
+        {
+            int nextUnitIndex = -1;
+            int highestInitiative = -1;
+
+            for (int i = 0; i < units.Count; ++i) {
+                var unit = units [i];
+                if (!unit.IsAlive ()) {
+                    continue;
+                }
+
+                if (unit.GetLastTurnMoved () >= _currentTurnNumber) {
+                    continue;
+                }
+
+                if ((nextUnitIndex == -1) ||
+                    (unit.GetInitiative () > highestInitiative)) {
+                    nextUnitIndex = i;
+                    highestInitiative = unit.initiative;
+                }
+            }
+
+            if (nextUnitIndex > -1) {
+                return nextUnitIndex;
+            }
+
+            for (int i = 0; i < units.Count; ++i) {
+                var unit = units [i];
+                if (!unit.IsAlive ()) {
+                    continue;
+                }
+
+                if ((nextUnitIndex == -1) ||
+                    (unit.GetInitiative () > highestInitiative)) {
+                    nextUnitIndex = i;
+                    highestInitiative = unit.initiative;
+                }
+            }
+
+            return nextUnitIndex;
+
+        }
+
         private void GenerateOrder (float deltaSeconds)
         {
             if (MINIMAX_AI) {
@@ -441,7 +731,8 @@ namespace MicroTwenty
                 var charRep = MakeCharRep (unit.unitName, unit.GetTeamID (),
                     unit.GetHexCoord (), 
                     unit.currentHP, unit.maxHP,
-                    unit.GetInitiative (), unit.GetLastTurnMoved ());
+                    unit.GetInitiative (), unit.GetLastTurnMoved (),
+                    unit.maxMove);
                 charRep = charRep.SetWeapon (unit.weapon).SetArmor (unit.armor);
                 charList.Add (charRep);
             }
@@ -465,12 +756,11 @@ namespace MicroTwenty
         private CharRep MakeCharRep (string name, 
             int teamIndex, HexCoord position, 
             int currentHealth, int maxHealth,
-            int initiative, int lastTurnMoved)
+            int initiative, int lastTurnMoved, 
+            int moveSpeed)
         {
             var weapon = new WeaponFistRep ();
             var armor = new ArmorClothRep ();
-
-            var moveSpeed = 3;
 
             return new CharRep (name, position, 
                 currentHealth, maxHealth, 
@@ -493,6 +783,26 @@ namespace MicroTwenty
                 }
                 if (unit.GetHexCoord ().DistanceTo (startCoord) == 1) {
                     outList.Add (unit);
+                }
+            }
+            return outList;
+        }
+
+        public List<int> GetEnemyIndicesAdjacentTo (HexCoord startCoord, int myTeamId)
+        {
+            var outList = new List<int> ();
+
+            for (int i = 0; i < units.Count; ++i) {
+                var unit = units [i];
+
+                if (!unit.IsAlive ()) {
+                    continue;
+                }
+                if (unit.GetTeamID () == myTeamId) {
+                    continue;
+                }
+                if (unit.GetHexCoord ().DistanceTo (startCoord) == 1) {
+                    outList.Add (i);
                 }
             }
             return outList;

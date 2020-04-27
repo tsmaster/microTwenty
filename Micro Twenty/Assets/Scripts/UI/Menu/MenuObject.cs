@@ -72,6 +72,7 @@ namespace MicroTwenty
             if (childLookup.ContainsKey (name)) {
                 return children [childLookup [name]];
             }
+
             var newChild = new MenuObject (name, _menuSprite, _fontSprite);
             children.Add (newChild);
             childLookup [name] = children.Count - 1;
@@ -187,6 +188,7 @@ namespace MicroTwenty
                 // cursor
                 if (itemIndex == _cursorIndex) {
                     GetSpriteLoc (_menuSprite, 12, out source_x, out source_y);
+
                     TextureDrawing.DrawPartialSprite (destTexture, _menuSprite,
                         x + (col * _cell_patch_width) * FONT_WIDTH + 4,
                         y - ((row * _cell_patch_height) + 1) * FONT_HEIGHT,

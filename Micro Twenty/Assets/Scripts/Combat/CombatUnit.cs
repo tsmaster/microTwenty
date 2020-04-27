@@ -21,7 +21,7 @@ namespace MicroTwenty
         public int maxMove;
 
 
-        public CombatUnit (string unitName, HexCoord hexCoord, int teamIndex, CombatantSprite sprite)
+        public CombatUnit (string unitName, HexCoord hexCoord, int teamIndex, CombatantSprite sprite, int maxMove)
         {
             this.unitName = unitName;
             this.hexCoord = hexCoord;
@@ -31,6 +31,7 @@ namespace MicroTwenty
             lastTurnMoved = -1;
             this.weapon = new WeaponFistRep ();
             this.armor = new ArmorClothRep ();
+            this.maxMove = maxMove;
         }
 
         public HexCoord GetHexCoord ()
