@@ -54,6 +54,14 @@ namespace MicroTwenty
         SPRITE_CHICKEN_LEG = 42, // no, but seriously - what is this?
     };
 
+    public enum ScreenId
+    {
+        BigDiceGamesScreen,
+        TitleScreen,
+        CreditsScreen,
+        MenuScreen
+    };
+
     public class MapManager : MonoBehaviour
     {
         [SerializeField]
@@ -64,6 +72,12 @@ namespace MicroTwenty
 
         [SerializeField]
         private Texture2D menuBitmap;
+
+        [SerializeField]
+        private Texture2D bigDiceGamesTexture;
+
+        [SerializeField]
+        private Texture2D microTwentyTexture;
 
         [SerializeField]
         private CanvasRenderer targetCanvasRenderer;
@@ -91,6 +105,7 @@ namespace MicroTwenty
         public MenuManager _menuMgr;
         public MenuObject _mainMenu;
 
+        public IIntroScreen _introScreen;
 
         // Start is called before the first frame update
         void Start ()
@@ -151,7 +166,7 @@ namespace MicroTwenty
             _mainMenu ["Combat"] ["Item"].AddItem ("Restore");
             _mainMenu ["Combat"] ["Item"].AddItem ("Revive");
             _mainMenu ["Combat"] ["Item"].AddItem ("Mana");
-            _mainMenu ["Combat"] ["Item"].AddItem ("Teleport").SetEnabled(false);
+            _mainMenu ["Combat"] ["Item"].AddItem ("Teleport").SetEnabled (false);
             _mainMenu ["Combat"].AddItem ("Magic").SetWindow (2, 6);
             _mainMenu ["Combat"] ["Magic"].AddItem ("Minor Heal");
             _mainMenu ["Combat"] ["Magic"].AddItem ("Heal");
@@ -172,12 +187,12 @@ namespace MicroTwenty
             _mainMenu ["Combat"] ["Magic"].AddItem ("Sickness");
             _mainMenu ["Combat"] ["Magic"].AddItem ("Illness");
             _mainMenu ["Combat"] ["Magic"].AddItem ("Plague");
-            _mainMenu ["Combat"] ["Magic"].AddItem ("Minor Death").SetEnabled(false);
+            _mainMenu ["Combat"] ["Magic"].AddItem ("Minor Death").SetEnabled (false);
             _mainMenu ["Combat"] ["Magic"].AddItem ("Death");
             _mainMenu ["Combat"] ["Magic"].AddItem ("Major Death");
             _mainMenu ["Combat"] ["Magic"].AddItem ("Red Death");
             _mainMenu ["Combat"] ["Magic"].AddItem ("Raise Dead");
-            _mainMenu ["Combat"].AddItem ("Wear").SetWindow(2, 5);
+            _mainMenu ["Combat"].AddItem ("Wear").SetWindow (2, 5);
             _mainMenu ["Combat"] ["Wear"].AddItem ("* None *");
             _mainMenu ["Combat"] ["Wear"].AddItem ("Cloth");
             _mainMenu ["Combat"] ["Wear"].AddItem ("Leather");
@@ -221,7 +236,9 @@ namespace MicroTwenty
             _mainMenu ["Cheat"] ["Teleport"] ["rat isl"].SetItemId (3003);
             _mainMenu.AddItem ("Debug");
             _mainMenu.AddItem ("Quit");
-            _mainMenu.Build();
+            _mainMenu.Build ();
+
+            ShowScreen (ScreenId.BigDiceGamesScreen);
         }
 
         internal int GetUnitCount () => _combatMgr.GetUnitCount ();
@@ -233,7 +250,7 @@ namespace MicroTwenty
             maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (0, -4, 4), "ep1c_rycroft", new HexCoord (0, 0, 0)));
             maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (1, -8, 7), "ep_1", new HexCoord (0, -4, 4)));
             maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (1, 2, -3), "ep1d_rathole", new HexCoord (0, -2, 2)));
-            maps [i].dynamicObjects.Add (new CombatTrigger (_gameMgr, new HexCoord (-2, 3, -1), "combat", new HexCoord(0, 0, 0)));
+            maps [i].dynamicObjects.Add (new CombatTrigger (_gameMgr, new HexCoord (-2, 3, -1), "combat", new HexCoord (0, 0, 0)));
 
             i = GetMapByName ("ep_2");
             maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (-7, 4, 3), "ep_1", new HexCoord (5, -8, 3)));
@@ -262,7 +279,7 @@ namespace MicroTwenty
 
             i = GetMapByName ("ep1d_rathole");
             maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (0, -2, 2), "ep_1", new HexCoord (1, 2, -3)));
-            maps [i].dynamicObjects.Add (new CombatTrigger (_gameMgr, new HexCoord (-1, 6, -5), "combat", new HexCoord(0, 0, 0)));
+            maps [i].dynamicObjects.Add (new CombatTrigger (_gameMgr, new HexCoord (-1, 6, -5), "combat", new HexCoord (0, 0, 0)));
 
             i = GetMapByName ("combat");
             // dynamic objects handled by combatMgr
@@ -321,7 +338,7 @@ namespace MicroTwenty
         {
             var outList = new List<DynamicObject> ();
             foreach (var dynObj in dynamicObjects) {
-                if (dynObj.hexCoord.Equals(hc)) {
+                if (dynObj.hexCoord.Equals (hc)) {
                     outList.Add (dynObj);
                 }
             }
@@ -352,6 +369,13 @@ namespace MicroTwenty
         void Update ()
         {
             var deltaSeconds = Time.deltaTime;
+
+            if (_introScreen != null) {
+                _introScreen.Draw ();
+                _introScreen.UpdateScreen (deltaSeconds);
+                return;
+            }
+
             _gameMgr.Update (deltaSeconds);
 
             if ((_combatMgr != null) &&
@@ -574,7 +598,7 @@ namespace MicroTwenty
                 TextureDrawing.DrawRect (targetTexture, startPosX, startPosY, msgWidth, msgHeight, fillColor, Color.red, true, true);
                 TextureDrawing.DrawStringAt (targetTexture, fontBitmap, oneScoreString, startPosX + 2, startPosY + 2, Color.red);
 
-                msgWidth = (zeroScoreString.Length * 6) + 4; 
+                msgWidth = (zeroScoreString.Length * 6) + 4;
                 startPosX -= (6 + 6 * zeroScoreString.Length + 8);
 
                 TextureDrawing.DrawRect (targetTexture, startPosX, startPosY, msgWidth, msgHeight, fillColor, Color.cyan, true, true);
@@ -585,7 +609,8 @@ namespace MicroTwenty
         }
 
 
-        public HexMap GetHexMap () {
+        public HexMap GetHexMap ()
+        {
             return maps [selectedMap];
         }
 
@@ -618,7 +643,7 @@ namespace MicroTwenty
             }
 
             foreach (var dynObj in GetHexMap ().dynamicObjects) {
-                if (dynObj.hexCoord.Equals(newPos)) {
+                if (dynObj.hexCoord.Equals (newPos)) {
                     if (dynObj.blocksMovement) {
                         return;
                     }
@@ -626,10 +651,10 @@ namespace MicroTwenty
             }
 
             SetPlayerPos (newPos);
-            Debug.LogFormat ("Moved to {0}", playerPos.ToString());
+            Debug.LogFormat ("Moved to {0}", playerPos.ToString ());
 
             foreach (var dynObj in GetHexMap ().dynamicObjects) {
-                if (dynObj.hexCoord.Equals(newPos)) {
+                if (dynObj.hexCoord.Equals (newPos)) {
                     dynObj.OnMoveOver ();
                 }
             }
@@ -693,7 +718,7 @@ namespace MicroTwenty
         {
             //Debug.LogFormat ("Drawing map");
 
-            foreach (var t in maps[selectedMap].tiles) {
+            foreach (var t in maps [selectedMap].tiles) {
                 var tile_width = 16;
                 var tile_height = 16;
 
@@ -782,7 +807,7 @@ namespace MicroTwenty
                     continue;
                 }
 
-                TextureDrawing.DrawTintedPartialSprite (targetTexture, hexTileSheet, 
+                TextureDrawing.DrawTintedPartialSprite (targetTexture, hexTileSheet,
                     px, py, source_x, source_y, tile_width, tile_height, tile_tint);
             }
 
@@ -801,7 +826,7 @@ namespace MicroTwenty
                 }
             }
 
-            foreach (var dynobj in maps[selectedMap].dynamicObjects) {
+            foreach (var dynobj in maps [selectedMap].dynamicObjects) {
                 var combObj = dynobj as CombatantSprite;
                 if (combObj != null) {
                     int team = combObj.GetTeam ();
@@ -826,7 +851,7 @@ namespace MicroTwenty
         {
             GetSpriteCoords (spriteId, out int sprite_x, out int sprite_y);
 
-            TextureDrawing.DrawTintedPartialSprite (targetTexture, hexTileSheet, 
+            TextureDrawing.DrawTintedPartialSprite (targetTexture, hexTileSheet,
                 screenPosX, screenPosY, sprite_x, sprite_y, 16, 16, c);
         }
 
@@ -834,7 +859,7 @@ namespace MicroTwenty
         {
             HexCoordToScreenCoords (hexCoord, out int px, out int py);
             GetSpriteCoords (spriteId, out int source_x, out int source_y);
-            TextureDrawing.DrawTintedPartialSprite (targetTexture, hexTileSheet, 
+            TextureDrawing.DrawTintedPartialSprite (targetTexture, hexTileSheet,
                 px, py, source_x, source_y, 16, 16, c);
         }
 
@@ -895,7 +920,7 @@ namespace MicroTwenty
         {
             int foundMapIndex = -1;
             for (int i = 0; i < maps.Count; ++i) {
-                if (maps [i].Name() == destMapName) {
+                if (maps [i].Name () == destMapName) {
                     foundMapIndex = i;
                     break;
                 }
@@ -906,7 +931,7 @@ namespace MicroTwenty
             }
             selectedMap = foundMapIndex;
             drawn = false;
-            SetPlayerPos(destMapCoord);
+            SetPlayerPos (destMapCoord);
         }
 
         internal void EnterCombat ()
@@ -930,6 +955,30 @@ namespace MicroTwenty
         internal CombatMgr GetCombatMgr ()
         {
             return _combatMgr;
+        }
+
+        internal void ShowScreen (ScreenId screenId)
+        {
+            Debug.LogFormat ("Showing screen {0}", screenId);
+            switch (screenId) {
+            case ScreenId.BigDiceGamesScreen:
+                _introScreen = new BigDiceGamesScreen (this, bigDiceGamesTexture);
+                break;
+
+            case ScreenId.TitleScreen:
+                _introScreen = new MicroTwentyTitleScreen (this, microTwentyTexture);
+                break;
+
+            case ScreenId.MenuScreen:
+                //_introScreen = new BigDiceGamesScreen (this);
+                _introScreen = null;
+                break;
+
+            case ScreenId.CreditsScreen:
+                //_introScreen = new BigDiceGamesScreen (this);
+                _introScreen = null;
+                break;
+            }
         }
     }
 }

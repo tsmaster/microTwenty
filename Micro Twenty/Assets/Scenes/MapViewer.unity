@@ -152,6 +152,8 @@ MonoBehaviour:
   hexTileSheet: {fileID: 2800000, guid: d429159bfbf2733a8ad118e074310543, type: 3}
   fontBitmap: {fileID: 2800000, guid: 8f295be2be856027099bc0f1f99b641a, type: 3}
   menuBitmap: {fileID: 2800000, guid: 41e2ecabe9b5513da87212fffaa67ab4, type: 3}
+  bigDiceGamesTexture: {fileID: 2800000, guid: 88bbd2f74f0b9b4baa17087de0aff07c, type: 3}
+  microTwentyTexture: {fileID: 2800000, guid: 1ebafa589bbee5fe8b64662b85f62969, type: 3}
   targetCanvasRenderer: {fileID: 1638449584}
   targetTextureWidth: 200
   targetTextureHeight: 200
