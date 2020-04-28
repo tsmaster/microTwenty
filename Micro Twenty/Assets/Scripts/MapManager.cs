@@ -81,6 +81,12 @@ namespace MicroTwenty
         private Texture2D microTwentyTexture;
 
         [SerializeField]
+        private Texture2D signIconTexture;
+
+        [SerializeField]
+        private Texture2D ratKingTexture;
+
+        [SerializeField]
         private CanvasRenderer targetCanvasRenderer;
 
         [SerializeField]
@@ -252,6 +258,9 @@ namespace MicroTwenty
             maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (1, -8, 7), "ep_1", new HexCoord (0, -4, 4)));
             maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (1, 2, -3), "ep1d_rathole", new HexCoord (0, -2, 2)));
             maps [i].dynamicObjects.Add (new CombatTrigger (_gameMgr, new HexCoord (-2, 3, -1), "combat", new HexCoord (0, 0, 0)));
+            maps [i].dynamicObjects.Add (new Signpost (_gameMgr, new HexCoord (2, -1, -1), "Signpost", new List<string> {
+                "A sign says",
+                "'Hello, Adventurer'." }));
 
             i = GetMapByName ("ep_2");
             maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (-7, 4, 3), "ep_1", new HexCoord (5, -8, 3)));
@@ -377,7 +386,8 @@ namespace MicroTwenty
                 return;
             }
 
-            _gameMgr.Update (deltaSeconds);
+            //_gameMgr.Update (deltaSeconds);
+            drawn = false;
 
             if ((_combatMgr != null) &&
                 (_combatMgr.InCombat)) {
@@ -568,6 +578,8 @@ namespace MicroTwenty
                 _menuMgr.Draw (targetTexture, 10, targetTexture.height - 10);
                 drawn = false;
             }
+
+            _gameMgr.Update (deltaSeconds);
         }
 
         private void ShowMenu ()
@@ -904,6 +916,11 @@ namespace MicroTwenty
                     has_sprite = true;
                 }
                 break;
+            case DynamicObject.DynamicObjectType.SIGN:
+                GetSpriteCoords (SpriteId.SPRITE_SIGN, out source_x, out source_y);
+                has_sprite = true;
+                break;
+
             default:
                 Debug.LogFormat ("drawing unknown dynamic object: {0}", objType);
                 has_sprite = false;
@@ -982,6 +999,16 @@ namespace MicroTwenty
                 _introScreen = null;
                 break;
             }
+        }
+
+        internal Texture2D GetSignBitmap ()
+        {
+            return signIconTexture;
+        }
+
+        internal Texture2D GetRatKingBitmap ()
+        {
+            return ratKingTexture;
         }
     }
 }

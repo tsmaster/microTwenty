@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace MicroTwenty
 {
@@ -20,9 +21,15 @@ namespace MicroTwenty
             mapManager.TeleportPlayer (destMapName, destMapCoord);
         }
 
+        internal MapManager GetMapManager ()
+        {
+            return mapManager;
+        }
+
         internal void AddCommand (Command command)
         {
             commands.Add (command);
+            Debug.LogFormat ("commands count: {0}", commands.Count);
         }
 
         internal void EnterCombat ()

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace MicroTwenty
@@ -17,6 +18,9 @@ namespace MicroTwenty
         public override void OnMoveOver ()
         {
             Debug.Log ("To Combat!");
+            gameMgr.AddCommand (new DialogCommand (gameMgr, "Combat", new List<string>{
+                "The Rat King says",
+                "'I send you to fight!'" }, gameMgr.GetMapManager().GetRatKingBitmap()));
             gameMgr.AddCommand (new CombatCommand ("combat", gameMgr, destMapName, destCoord));
         }
     }

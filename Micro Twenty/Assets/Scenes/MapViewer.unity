@@ -154,6 +154,8 @@ MonoBehaviour:
   menuBitmap: {fileID: 2800000, guid: 41e2ecabe9b5513da87212fffaa67ab4, type: 3}
   bigDiceGamesTexture: {fileID: 2800000, guid: 88bbd2f74f0b9b4baa17087de0aff07c, type: 3}
   microTwentyTexture: {fileID: 2800000, guid: 1ebafa589bbee5fe8b64662b85f62969, type: 3}
+  signIconTexture: {fileID: 2800000, guid: 4d17794a49fe96c97ab7f98d6859c548, type: 3}
+  ratKingTexture: {fileID: 2800000, guid: c9c66e0de320e42a5b5bd22e5429ccbd, type: 3}
   targetCanvasRenderer: {fileID: 1638449584}
   targetTextureWidth: 200
   targetTextureHeight: 200

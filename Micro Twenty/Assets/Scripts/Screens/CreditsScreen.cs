@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -95,7 +95,7 @@ namespace MicroTwenty
             TextureDrawing.DrawRect (targetTexture, 0, 0, targetTexture.width, targetTexture.height, Color.black, Color.black, true, false);
 
             for (int i = 0; i < _credits.Count; ++i) {
-                int creditY = (int)(_slideY - i * LINE_SPACING);
+                int creditY = (int)Mathf.FloorToInt(_slideY - i * LINE_SPACING);
 
                 string msg = _credits [i];
 

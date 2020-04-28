@@ -65,13 +65,13 @@ namespace MicroTwenty
 
         private string _preCombatString;
         private string _postCombatString;
-        private float _preBattleClock;
         private float _postBattleClock;
         private OrderUiPhase _orderUiPhase;
         private bool _showingCombatMenu;
         private MenuManager _menuMgr;
         private Texture2D _targetTexture;
         private SelectionMode _selector;
+        private DialogBox _combatDialog;
 
         public Dictionary<int, int> WinTally { 
             get { return _winTally; }
@@ -210,21 +210,49 @@ namespace MicroTwenty
 
             BdgRandom.ShuffleList (units);
 
-            // HACK HACK HACK for soak test
-            var count = UnityEngine.Random.Range (2, units.Count);
-            units = units.GetRange (0, count);
+            List<int> monsterIndices = new List<int> ();
+
+            while (true) {
+                // HACK HACK HACK for soak test
+                var count = UnityEngine.Random.Range (2, units.Count);
+                units = units.GetRange (0, count);
+
+                int monsterCount = 0;
+
+                _preCombatString = "You face these monsters: ";
 
 
-            int monsterCount = 0;
+                for (int i = 0; i < units.Count; ++i) {
+                    units [i].initiative = 10 - i;
+                    if (units [i].GetTeamID () == 1) {
+                        ++monsterCount;
+                        monsterIndices.Add (i);
+                    }
+                }
 
-            for (int i = 0; i < units.Count; ++i) {
-                units [i].initiative = 10 - i;
-                if (units [i].GetTeamID () == 1) {
-                    ++monsterCount;
+                if (monsterCount == 0) {
+                    continue;
+                } else {
+                    break;
                 }
             }
 
-            _preCombatString = string.Format ("You face {0} monsters.", monsterCount);
+            for (int i = 0; i < monsterIndices.Count; ++i) {
+                var monsterIndex = monsterIndices [i];
+                var monsterName = units [monsterIndex].unitName;
+
+                if (i < monsterIndices.Count - 1) {
+                    _preCombatString += monsterName + ", ";
+                } else {
+                    _preCombatString += string.Format ("and {0}.", monsterName);
+                }
+            }
+
+            List<string> preCombatMsg = WordWrap (_preCombatString, 24); 
+
+            _combatDialog = new DialogBox (_mapManager, "COMBAT", preCombatMsg, null);
+
+            //_preCombatString = string.Format ("You face {0} monsters.", monsterCount);
             _logLines.Clear ();
             AddLogLine ("Combat Starts");
 
@@ -236,8 +264,39 @@ namespace MicroTwenty
 
             _isDone = false;
             _combatPhase = CombatPhase.PRE_COMBAT;
-            _preBattleClock = 0.0f;
             _postBattleClock = 0.0f;
+        }
+
+        private List<string> WordWrap (string msg, int lineLength)
+        {
+            var outList = new List<string> ();
+            var cursor = 0;
+
+            while (cursor < _preCombatString.Length) {
+                var cutLength = FindLineLength (msg, cursor, lineLength); 
+                var cutString = _preCombatString.Substring (cursor, cutLength);
+                outList.Add (cutString);
+                cursor += cutLength;
+            }
+
+            return outList;
+        }
+
+        private int FindLineLength (string msg, int cursor, int lineLength)
+        {
+            var len = Math.Min (lineLength, msg.Length - cursor);
+            while (len > 0) {
+                if (cursor + len == msg.Length) {
+                    return len;
+                }
+                var lastChar = msg [cursor + len];
+                if (lastChar == ' ') {
+                    return len;
+                } else {
+                    len -= 1;
+                }
+            }
+            return len;
         }
 
         public void Update (float deltaSeconds) {
@@ -559,7 +618,7 @@ namespace MicroTwenty
 
         private void DrawPreBattle ()
         {
-            DrawCenteredStringInBox (_preCombatString);
+            _combatDialog.Draw ();
         }
 
         private void DrawCenteredStringInBox (string msg)
@@ -617,8 +676,8 @@ namespace MicroTwenty
 
         private void UpdatePreBattle (float deltaSeconds)
         {
-            _preBattleClock += deltaSeconds;
-            if (_preBattleClock >= PRE_BATTLE_DURATION) {
+            _combatDialog.Update (deltaSeconds, out bool isDone);
+            if (isDone) {
                 _combatPhase = CombatPhase.IN_COMBAT;
             }
         }
