@@ -262,6 +262,11 @@ namespace MicroTwenty
                 "A sign says",
                 "'Hello, Adventurer'." }));
 
+            maps [i].dynamicObjects.Add (new NarrativeMsg (_gameMgr, new HexCoord (4, 1, -5), "Message", new List<string> {
+                "It is quiet and still.",
+                "Still what?",
+                "Still quiet." }));
+
             i = GetMapByName ("ep_2");
             maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (-7, 4, 3), "ep_1", new HexCoord (5, -8, 3)));
             maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (5, -8, 3), "ep_3", new HexCoord (-7, 4, 3)));
@@ -919,6 +924,10 @@ namespace MicroTwenty
             case DynamicObject.DynamicObjectType.SIGN:
                 GetSpriteCoords (SpriteId.SPRITE_SIGN, out source_x, out source_y);
                 has_sprite = true;
+                break;
+
+            case DynamicObject.DynamicObjectType.NARRATIVEMSG:
+                has_sprite = false;
                 break;
 
             default:

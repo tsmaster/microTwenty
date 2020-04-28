@@ -14,6 +14,7 @@ namespace MicroTwenty
             TREE,
             SHIP,
             COMBATANT,
+            NARRATIVEMSG,
         }
 
         public HexCoord hexCoord;
