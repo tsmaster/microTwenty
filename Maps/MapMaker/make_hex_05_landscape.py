@@ -85,7 +85,7 @@ def drawLine(si, sj, hexRad, lineList):
 # tiles that drawLine prepares.
         
 def drawLabels(canvas, si, sj, hexRad):
-    canvas.setFont("Helvetica", 4)
+    canvas.setFont("Helvetica", 8)
     
     for mult in range(-20, 20):
         mi = si + mult * 2

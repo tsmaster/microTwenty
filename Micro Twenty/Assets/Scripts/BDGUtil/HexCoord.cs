@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace MicroTwenty
 {
@@ -160,6 +161,65 @@ namespace MicroTwenty
             return (Math.Abs (this.x - destCoord.x) +
                 Math.Abs (this.y - destCoord.y) +
                 Math.Abs (this.z - destCoord.z)) / 2;
+        }
+
+        public static List<HexCoord> DrawLine (HexCoord start, HexCoord end)
+        {
+            var numPoints = start.DistanceTo (end);
+            var outList = new List<HexCoord> ();
+
+            for (int i = 0; i <= numPoints; ++i) {
+                float frac = i / (float)numPoints;
+                FloatHexCoord fhc = FloatHexCoord.CubeLerp (start, end, frac);
+                HexCoord hc = FloatHexCoord.CubeRound (fhc);
+                outList.Add (hc);
+            }
+            return outList;
+        }
+
+
+    }
+
+    public class FloatHexCoord
+    {
+        public float x;
+        public float y;
+        public float z;
+
+        public FloatHexCoord (float x, float y, float z)
+        {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+
+        public static FloatHexCoord CubeLerp (HexCoord start, HexCoord end, float frac)
+        {
+            return new FloatHexCoord (
+                BdgMath.Map (frac, 0, 1, start.x, end.x),
+                BdgMath.Map (frac, 0, 1, start.y, end.y),
+                BdgMath.Map (frac, 0, 1, start.z, end.z));
+        }
+
+        public static HexCoord CubeRound (FloatHexCoord fhc)
+        {
+            var rx = Mathf.RoundToInt (fhc.x);
+            var ry = Mathf.RoundToInt (fhc.y);
+            var rz = Mathf.RoundToInt (fhc.z);
+
+            var xDiff = Mathf.Abs (rx - fhc.x);
+            var yDiff = Mathf.Abs (ry - fhc.y);
+            var zDiff = Mathf.Abs (rz - fhc.z);
+
+            if ((xDiff > yDiff) && (xDiff > zDiff)) {
+                rx = -ry - rz;
+            } else if (yDiff > zDiff) {
+                ry = -rx - rz;
+            } else {
+                rz = -rx - ry;
+            }
+
+            return new HexCoord (rx, ry, rz);
         }
     }
 }

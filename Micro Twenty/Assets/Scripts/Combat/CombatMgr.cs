@@ -56,7 +56,8 @@ namespace MicroTwenty
             RANGE,
             MAGIC,
             ITEM,
-            DEFEND
+            DEFEND,
+            SKILL
         };
 
         private CombatPhase _combatPhase;
@@ -112,9 +113,10 @@ namespace MicroTwenty
             _combatMenu.SetWindow (1, 4);
             _combatMenu.AddItem ("Move").SetItemId((int)OrderMenuItemId.MOVE);
             _combatMenu.AddItem ("Melee Attack").SetItemId ((int)OrderMenuItemId.MELEE);
-            _combatMenu.AddItem ("Ranged Attack").SetEnabled(false).SetItemId ((int)OrderMenuItemId.RANGE);
+            _combatMenu.AddItem ("Ranged Attack").SetItemId ((int)OrderMenuItemId.RANGE);
             _combatMenu.AddItem ("Cast Magic").SetEnabled(false).SetItemId ((int)OrderMenuItemId.MAGIC);
             _combatMenu.AddItem ("Use Item").SetEnabled (false).SetItemId ((int)OrderMenuItemId.ITEM);
+            _combatMenu.AddItem ("Use Skill").SetEnabled (false).SetItemId ((int)OrderMenuItemId.SKILL);
             _combatMenu.AddItem ("Defend").SetItemId ((int)OrderMenuItemId.DEFEND);
 
             _combatMenu.Build ();
@@ -181,8 +183,8 @@ namespace MicroTwenty
             var t0Starts = HexCoord.GetWithinRangeFromLoc (2, sl0).FindAll (IsLocationWalkable);
             BdgRandom.ShuffleList<HexCoord> (t0Starts);
 
-            AddUnit ("Stan", t0Starts[0], SpriteId.SPRITE_COMBAT_GUY_1, 0, 3).AddWeapon(WeaponRep.MakeSword()).AddArmor(ArmorRep.MakeLeatherArmor());
-            AddUnit ("Kim", t0Starts [1], SpriteId.SPRITE_COMBAT_GUY_2, 0, 3).AddWeapon (WeaponRep.MakeSword ()).AddArmor (ArmorRep.MakeLeatherArmor ());
+            AddUnit ("Stan", t0Starts[0], SpriteId.SPRITE_COMBAT_GUY_1, 0, 3).AddWeapon(WeaponRep.MakeBow()).AddArmor(ArmorRep.MakeLeatherArmor());
+            AddUnit ("Kim", t0Starts [1], SpriteId.SPRITE_COMBAT_GUY_2, 0, 3).AddWeapon (WeaponRep.MakeBow ()).AddArmor (ArmorRep.MakeLeatherArmor ());
             AddUnit ("Flexo", t0Starts [2], SpriteId.SPRITE_COMBAT_GUY_3, 0, 2).AddWeapon (WeaponRep.MakeSword ()).AddArmor (ArmorRep.MakeLeatherArmor ());
             AddUnit ("Mags", t0Starts [3], SpriteId.SPRITE_COMBAT_GUY_4, 0, 3).AddWeapon (WeaponRep.MakeStaff ()).AddArmor (ArmorRep.MakeClothArmor ());
             AddUnit ("Torso", t0Starts [4], SpriteId.SPRITE_COMBAT_GUY_5, 0, 2).AddWeapon (WeaponRep.MakeSword ()).AddArmor (ArmorRep.MakePlateArmor ());
@@ -191,22 +193,41 @@ namespace MicroTwenty
             var t1Starts = HexCoord.GetWithinRangeFromLoc (2, sl1).FindAll (IsLocationWalkable);
             BdgRandom.ShuffleList<HexCoord> (t1Starts);
 
-            AddUnit ("Snake", t1Starts [0], SpriteId.SPRITE_COMBAT_SNAKE, 1, 3).AddWeapon(WeaponRep.MakeBiteWeapon ());
-            AddUnit ("Dog",   t1Starts [1], SpriteId.SPRITE_COMBAT_DOG, 1, 3).AddWeapon (WeaponRep.MakeBiteWeapon ());
-            AddUnit ("Ratman", t1Starts [2], SpriteId.SPRITE_COMBAT_RAT_MAN, 1, 3).AddWeapon (WeaponRep.MakeSword ());
-            AddUnit ("Crab",  t1Starts [3], SpriteId.SPRITE_COMBAT_CRAB, 1, 2).AddWeapon (WeaponRep.MakeBiteWeapon ()); 
-            AddUnit ("Ghost", t1Starts [4], SpriteId.SPRITE_COMBAT_GHOST, 1, 2).AddWeapon (WeaponRep.MakePsiWeapon ()); 
-            AddUnit ("Djinn", t1Starts [5], SpriteId.SPRITE_COMBAT_DJINN, 1, 2).AddWeapon (WeaponRep.MakePsiWeapon ());
-            AddUnit ("Cat",   t1Starts [6], SpriteId.SPRITE_COMBAT_CAT, 1, 3).AddWeapon (WeaponRep.MakeBiteWeapon ());
-            AddUnit ("Skeleton", t1Starts [7], SpriteId.SPRITE_COMBAT_SKELETON, 1, 3).AddWeapon (WeaponRep.MakeSword ()); 
-            AddUnit ("Staff", t1Starts [8], SpriteId.SPRITE_COMBAT_STAFF, 1, 3).AddWeapon (WeaponRep.MakeStaff ());
-            AddUnit ("Bug", t1Starts [9], SpriteId.SPRITE_COMBAT_BUG, 1, 3).AddWeapon (WeaponRep.MakeBiteWeapon ());
+            var monsterGenerationStrategy = UnityEngine.Random.Range(0,3);
 
-            //AddUnit ("Snake", new HexCoord (-3, 0, 3), SpriteId.SPRITE_COMBAT_SNAKE, 1);
-            //AddUnit ("Snake", new HexCoord (-3, 3, 0), SpriteId.SPRITE_COMBAT_SNAKE, 1);
-            //AddUnit ("Snake", new HexCoord (0, -3, 3), SpriteId.SPRITE_COMBAT_SNAKE, 1);
-            //AddUnit ("Snake", new HexCoord (3, -3, 0), SpriteId.SPRITE_COMBAT_SNAKE, 1);
-            //AddUnit ("Snake", new HexCoord (0, 3, -3), SpriteId.SPRITE_COMBAT_SNAKE, 1);
+            // HACK HACK HACK
+            monsterGenerationStrategy = 2;
+
+            switch (monsterGenerationStrategy) {
+            case 0:
+                AddUnit ("Snake", t1Starts [0], SpriteId.SPRITE_COMBAT_SNAKE, 1, 3).AddWeapon (WeaponRep.MakeBiteWeapon ());
+                AddUnit ("Dog", t1Starts [1], SpriteId.SPRITE_COMBAT_DOG, 1, 3).AddWeapon (WeaponRep.MakeBiteWeapon ());
+                AddUnit ("Ratman", t1Starts [2], SpriteId.SPRITE_COMBAT_RAT_MAN, 1, 3).AddWeapon (WeaponRep.MakeSword ());
+                AddUnit ("Crab", t1Starts [3], SpriteId.SPRITE_COMBAT_CRAB, 1, 2).AddWeapon (WeaponRep.MakeBiteWeapon ());
+                AddUnit ("Ghost", t1Starts [4], SpriteId.SPRITE_COMBAT_GHOST, 1, 2).AddWeapon (WeaponRep.MakePsiWeapon ());
+                AddUnit ("Djinn", t1Starts [5], SpriteId.SPRITE_COMBAT_DJINN, 1, 2).AddWeapon (WeaponRep.MakePsiWeapon ());
+                AddUnit ("Cat", t1Starts [6], SpriteId.SPRITE_COMBAT_CAT, 1, 3).AddWeapon (WeaponRep.MakeBiteWeapon ());
+                AddUnit ("Skeleton", t1Starts [7], SpriteId.SPRITE_COMBAT_SKELETON, 1, 3).AddWeapon (WeaponRep.MakeSword ());
+                AddUnit ("Skeleton Archer", t1Starts [8], SpriteId.SPRITE_COMBAT_SKELETON_ARCHER, 1, 3).AddWeapon (WeaponRep.MakeBow ());
+                AddUnit ("Staff", t1Starts [9], SpriteId.SPRITE_COMBAT_STAFF, 1, 3).AddWeapon (WeaponRep.MakeStaff ());
+                AddUnit ("Bug", t1Starts [10], SpriteId.SPRITE_COMBAT_BUG, 1, 3).AddWeapon (WeaponRep.MakeBiteWeapon ());
+                break;
+            case 1:
+                AddUnit ("Snake", t1Starts [0], SpriteId.SPRITE_COMBAT_SNAKE, 1, 3).AddWeapon (WeaponRep.MakeBiteWeapon ());
+                AddUnit ("Snake", t1Starts [1], SpriteId.SPRITE_COMBAT_SNAKE, 1, 3).AddWeapon (WeaponRep.MakeBiteWeapon ());
+                AddUnit ("Snake", t1Starts [2], SpriteId.SPRITE_COMBAT_SNAKE, 1, 3).AddWeapon (WeaponRep.MakeBiteWeapon ());
+                AddUnit ("Snake", t1Starts [3], SpriteId.SPRITE_COMBAT_SNAKE, 1, 3).AddWeapon (WeaponRep.MakeBiteWeapon ());
+                AddUnit ("Snake", t1Starts [4], SpriteId.SPRITE_COMBAT_SNAKE, 1, 3).AddWeapon (WeaponRep.MakeBiteWeapon ());
+                break;
+            case 2:
+                AddUnit ("Skeleton", t1Starts [0], SpriteId.SPRITE_COMBAT_SKELETON, 1, 3).AddWeapon (WeaponRep.MakeSword ());
+                AddUnit ("Skeleton", t1Starts [1], SpriteId.SPRITE_COMBAT_SKELETON, 1, 3).AddWeapon (WeaponRep.MakeSword ());
+                AddUnit ("Skeleton", t1Starts [2], SpriteId.SPRITE_COMBAT_SKELETON, 1, 3).AddWeapon (WeaponRep.MakeSword ());
+                AddUnit ("Skeleton Archer", t1Starts [3], SpriteId.SPRITE_COMBAT_SKELETON_ARCHER, 1, 3).AddWeapon (WeaponRep.MakeBow ());
+                AddUnit ("Skeleton Archer", t1Starts [4], SpriteId.SPRITE_COMBAT_SKELETON_ARCHER, 1, 3).AddWeapon (WeaponRep.MakeBow ());
+                AddUnit ("Skeleton Archer", t1Starts [5], SpriteId.SPRITE_COMBAT_SKELETON_ARCHER, 1, 3).AddWeapon (WeaponRep.MakeBow ());
+                break;
+            }
 
             BdgRandom.ShuffleList (units);
 
@@ -214,13 +235,12 @@ namespace MicroTwenty
 
             while (true) {
                 // HACK HACK HACK for soak test
-                var count = UnityEngine.Random.Range (2, units.Count);
-                units = units.GetRange (0, count);
+                //var count = UnityEngine.Random.Range (2, units.Count);
+                //units = units.GetRange (0, count);
 
                 int monsterCount = 0;
 
                 _preCombatString = "You face these monsters: ";
-
 
                 for (int i = 0; i < units.Count; ++i) {
                     units [i].initiative = 10 - i;
@@ -345,6 +365,7 @@ namespace MicroTwenty
                 case OrderUiPhase.INVALID:
                     _orderUiPhase = OrderUiPhase.SHOWING_MENU;
                     _showingCombatMenu = true;
+                    PopulateCombatMenu (nextUnitIndex);
                     _menuMgr.OpenMenu (_combatMenu);
                     break;
                 case OrderUiPhase.SHOWING_MENU:
@@ -374,6 +395,15 @@ namespace MicroTwenty
                     _currentOrder = null;
                 }
             }
+        }
+
+        private void PopulateCombatMenu (int nextUnitIndex)
+        {
+            var unit = units [nextUnitIndex];
+            var weapon = unit.weapon;
+
+            _combatMenu ["Melee Attack"].SetEnabled ((weapon != null) && (!weapon.IsRanged));
+            _combatMenu ["Ranged Attack"].SetEnabled ((weapon != null) && (weapon.IsRanged));
         }
 
         private bool IsTeamAi (int teamIndex)
@@ -464,7 +494,11 @@ namespace MicroTwenty
                     break;
                 case (int)OrderMenuItemId.RANGE:
                     // ranged attack selected
-                    // TODO select ranged target
+                    var unitIndex = GetNextUnitIndex ();
+                    var weapon = units [unitIndex].weapon;
+                    _selector = new RangedTargetSelectionMode (GetNextUnitIndex (), _mapManager, this, weapon.MinRange, weapon.MaxRange);
+                    _selector.OnLocationSelected += OnSelectedRangedTarget;
+                    _orderUiPhase = OrderUiPhase.CURSOR;
                     break;
                 case (int)OrderMenuItemId.MELEE:
                     // melee attack selected
@@ -498,7 +532,16 @@ namespace MicroTwenty
             var nextUnitIndex = GetNextUnitIndex ();
             var attacker = units [nextUnitIndex];
             var target = GetCombatUnitByLocation (hc);
-            _currentOrder = new AttackOrder (_mapManager, attacker, target);
+            _currentOrder = new AttackOrder (_mapManager, attacker, target, SpriteId.SPRITE_TILE_EMPTY);
+        }
+
+        private void OnSelectedRangedTarget (HexCoord hc)
+        {
+            var nextUnitIndex = GetNextUnitIndex ();
+            var attacker = units [nextUnitIndex];
+            var target = GetCombatUnitByLocation (hc);
+
+            _currentOrder = new AttackOrder (_mapManager, attacker, target, SpriteId.SPRITE_ARROW_EW);
         }
 
         private CombatUnit GetCombatUnitByLocation (HexCoord hc)
@@ -861,6 +904,28 @@ namespace MicroTwenty
                     continue;
                 }
                 if (unit.GetHexCoord ().DistanceTo (startCoord) == 1) {
+                    outList.Add (i);
+                }
+            }
+            return outList;
+        }
+
+        internal List<int> GetEnemyIndicesInRange (HexCoord startCoord, int myTeamId, int minRange, int maxRange)
+        {
+            var outList = new List<int> ();
+
+            for (int i = 0; i < units.Count; ++i) {
+                var unit = units [i];
+
+                if (!unit.IsAlive ()) {
+                    continue;
+                }
+                if (unit.GetTeamID () == myTeamId) {
+                    continue;
+                }
+
+                var dist = unit.GetHexCoord ().DistanceTo (startCoord);
+                if ((minRange <= dist) && (dist <= maxRange)) {
                     outList.Add (i);
                 }
             }

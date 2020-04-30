@@ -9,7 +9,8 @@ namespace MicroTwenty
         public List<ICombatAction> GenerateMoves (WorldRep gameState)
         {
             List<ICombatAction> actions = new List<ICombatAction> ();
-            actions.AddRange (GenerateAttackWeakestMoves (gameState));
+            actions.AddRange (GenerateMeleeAttackWeakestMoves (gameState));
+            actions.AddRange (GenerateRangedAttackWeakestMoves (gameState));
             //actions.AddRange (GenerateMoveToWeakestMoves (gameState, false));
             actions.AddRange (GenerateMoveToClosestActions (gameState, false));
             if (actions.Count == 0) {
@@ -78,7 +79,7 @@ namespace MicroTwenty
             return outActions;
         }
 
-        public List<ICombatAction> GenerateAttackWeakestMoves (WorldRep gameState)
+        public List<ICombatAction> GenerateMeleeAttackWeakestMoves (WorldRep gameState)
         {
             var outList = new List<ICombatAction> ();
             var movingUnitIndex = gameState.GetIndexOfMovingUnit ();
@@ -88,6 +89,15 @@ namespace MicroTwenty
             }
 
             var movingUnit = gameState.Chars [movingUnitIndex];
+
+            var weapon = movingUnit.CurrentWeapon;
+            if (weapon == null) {
+                return outList;
+            }
+
+            if (weapon.IsRanged) {
+                return outList;
+            }
 
             var adjacentEnemyIndices = gameState.GetAdjacentEnemyIndices (movingUnitIndex);
 
@@ -125,6 +135,64 @@ namespace MicroTwenty
 
             return outList;
         }
+
+        public List<ICombatAction> GenerateRangedAttackWeakestMoves (WorldRep gameState)
+        {
+            var outList = new List<ICombatAction> ();
+            var movingUnitIndex = gameState.GetIndexOfMovingUnit ();
+
+            if (movingUnitIndex == -1) {
+                return outList;
+            }
+
+            var movingUnit = gameState.Chars [movingUnitIndex];
+
+            var weapon = movingUnit.CurrentWeapon;
+            if (weapon == null) {
+                return outList;
+            }
+
+            if (!weapon.IsRanged) {
+                return outList;
+            }
+
+            var rangedEnemyIndices = gameState.GetEnemyIndicesInRange (movingUnitIndex, weapon.MinRange, weapon.MaxRange);
+
+            // if we don't have enemy(s) adjacent, exit
+
+            if ((rangedEnemyIndices == null) ||
+                (rangedEnemyIndices.Count == 0)) {
+                return outList;
+            }
+
+            int lowestHealth = -1;
+            bool foundAny = false;
+
+            // find the lowest health value
+            foreach (var enemyIndex in rangedEnemyIndices) {
+                var adjChar = gameState.Chars [enemyIndex];
+                if ((!foundAny) ||
+                    (adjChar.CurrentHealth < lowestHealth)) {
+                    foundAny = true;
+                    lowestHealth = adjChar.CurrentHealth;
+                }
+            }
+
+            Debug.Assert (foundAny);
+            Debug.Assert (lowestHealth > 0);
+
+            // for each enemy tied for weakest, return an order to attack that enemy
+            foreach (var i in rangedEnemyIndices) {
+                var c = gameState.Chars [i];
+                if (c.CurrentHealth != lowestHealth) {
+                    continue;
+                }
+                outList.Add (new AttackActionImpl (movingUnitIndex, i));
+            }
+
+            return outList;
+        }
+
 
         public List<ICombatAction> GenerateMoveToWeakestMoves (WorldRep gameState, bool verbose)
         {

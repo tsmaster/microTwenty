@@ -44,14 +44,18 @@ namespace MicroTwenty
         SPRITE_COMBAT_GHOST = 32,
         SPRITE_COMBAT_DJINN = 33,
         SPRITE_COMBAT_SKELETON = 34,
-        SPRITE_COMBAT_STAFF = 35,
-        SPRITE_COMBAT_BUG = 36,
-        SPRITE_SIGN = 37,
-        SPRITE_LAMPPOST = 38,
-        SPRITE_CHEST = 39,
-        SPRITE_POTION = 40,
-        SPRITE_SCROLL = 41,
-        SPRITE_CHICKEN_LEG = 42, // no, but seriously - what is this?
+        SPRITE_COMBAT_SKELETON_ARCHER = 35,
+        SPRITE_COMBAT_STAFF = 36,
+        SPRITE_COMBAT_BUG = 37,
+        SPRITE_SIGN = 38,
+        SPRITE_LAMPPOST = 39,
+        SPRITE_CHEST = 40,
+        SPRITE_POTION = 41,
+        SPRITE_SCROLL = 42,
+        SPRITE_CHICKEN_LEG = 43, // no, but seriously - what is this?
+        SPRITE_ARROW_EW = 44,
+        SPRITE_ARROW_SWNE = 45,
+        SPRITE_ARROW_NWSE = 46,
     };
 
     public enum ScreenId

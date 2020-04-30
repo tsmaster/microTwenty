@@ -40,7 +40,8 @@ namespace MicroTwenty
         public List<int> GetUnitIndicesInRangeOf (int movingUnitIndex, int range)
         {
             var adjacentIndices = new List<int> ();
-            var center = Chars [movingUnitIndex].Position;
+            var movingUnit = Chars [movingUnitIndex];
+            var center = movingUnit.Position;
 
             for (int i = 0; i < Chars.Count; ++i) {
                 var c = Chars [i];
@@ -49,6 +50,33 @@ namespace MicroTwenty
                 }
                 var cp = c.Position;
                 if (cp.DistanceTo (center) <= range) {
+                    adjacentIndices.Add (i);
+                }
+            }
+            return adjacentIndices;
+        }
+
+        /// <summary>
+        /// Gets a list of indices of units whose distance to the moving unit is less than or equal to range
+        /// </summary>
+        /// <returns>The unit indices in range of.</returns>
+        /// <param name="movingUnitIndex">Moving unit index.</param>
+        /// <param name="minRange">min Range.</param>
+        /// <param name="maxRange">max Range.</param>
+        public List<int> GetUnitIndicesBetweenRanges (int movingUnitIndex, int minRange, int maxRange)
+        {
+            var adjacentIndices = new List<int> ();
+            var movingUnit = Chars [movingUnitIndex];
+            var center = movingUnit.Position;
+
+            for (int i = 0; i < Chars.Count; ++i) {
+                var c = Chars [i];
+                if (!c.IsAlive ()) {
+                    continue;
+                }
+                var cp = c.Position;
+                var dist = cp.DistanceTo (center);
+                if ((minRange <= dist) && (dist <= maxRange)) {
                     adjacentIndices.Add (i);
                 }
             }
@@ -78,6 +106,15 @@ namespace MicroTwenty
             var movingTeam = Chars [movingUnitIndex].TeamIndex;
 
             return GetAdjacentUnitIndices (movingUnitIndex).FindAll((idx) => {
+                return Chars [idx].TeamIndex != movingTeam;
+            });
+        }
+
+        internal List<int> GetEnemyIndicesInRange (int movingUnitIndex, int minRange, int maxRange)
+        {
+            var movingTeam = Chars [movingUnitIndex].TeamIndex;
+
+            return GetUnitIndicesBetweenRanges (movingUnitIndex, minRange, maxRange).FindAll ((idx) => {
                 return Chars [idx].TeamIndex != movingTeam;
             });
         }

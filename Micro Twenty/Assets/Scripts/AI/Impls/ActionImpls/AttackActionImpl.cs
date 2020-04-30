@@ -21,7 +21,9 @@ namespace MicroTwenty
         {
             var attacker = mapManager.GetCombatUnitByIndex (_attackingCharIndex);
             var target = mapManager.GetCombatUnitByIndex (_targetCharIndex);
-            return new AttackOrder (mapManager, attacker, target);
+
+            // TODO pass in correct sprite ID
+            return new AttackOrder (mapManager, attacker, target, SpriteId.SPRITE_ARROW_EW);
         }
     }
 }

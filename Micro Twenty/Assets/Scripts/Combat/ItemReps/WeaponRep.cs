@@ -9,6 +9,7 @@ namespace MicroTwenty
         public readonly int Modifier;
         public readonly int MinRange;
         public readonly int MaxRange;
+        public readonly bool IsRanged;
 
         public WeaponRep (string name, int numDice, int diceSides, int modifier)
         {
@@ -16,6 +17,18 @@ namespace MicroTwenty
             NumDice = numDice;
             DiceSides = diceSides;
             Modifier = modifier;
+            IsRanged = false;
+        }
+
+        public WeaponRep (string name, int numDice, int diceSides, int modifier, int minRange, int maxRange)
+        {
+            Name = name;
+            NumDice = numDice;
+            DiceSides = diceSides;
+            Modifier = modifier;
+            IsRanged = true;
+            MinRange = minRange;
+            MaxRange = maxRange;
         }
 
         public float GetExpectedDamage ()
@@ -41,6 +54,11 @@ namespace MicroTwenty
         public static WeaponRep MakeSword ()
         {
             return new WeaponRep ("Sword", 1, 8, 0);
+        }
+
+        public static WeaponRep MakeBow ()
+        {
+            return new WeaponRep ("Bow", 1, 6, 0, 2, 5);
         }
 
         public static WeaponRep MakeStaff ()
