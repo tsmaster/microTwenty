@@ -32,9 +32,9 @@ namespace MicroTwenty
             Debug.LogFormat ("commands count: {0}", commands.Count);
         }
 
-        internal void EnterCombat ()
+        internal void EnterCombat (string destMapName)
         {
-            mapManager.EnterCombat ();
+            mapManager.EnterCombat (destMapName);
         }
 
         internal void Update (float deltaSeconds)

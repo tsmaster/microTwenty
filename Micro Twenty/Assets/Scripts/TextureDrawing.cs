@@ -15,7 +15,7 @@ namespace MicroTwenty
                 left = 0;
             }
             if (left + width >= targetTexture.width) {
-                width = targetTexture.width - left - 1;
+                width = targetTexture.width - left;
             }
 
             if (width <= 0) {
@@ -27,7 +27,7 @@ namespace MicroTwenty
                 top = 0;
             }
             if (top + height >= targetTexture.height) {
-                height = targetTexture.height - top - 1;
+                height = targetTexture.height - top;
             }
 
             if (height <= 0) {
@@ -78,7 +78,7 @@ namespace MicroTwenty
                 target_x = 0;
             }
             if (target_x + width >= targetTexture.width) {
-                width = targetTexture.width - target_x - 1;
+                width = targetTexture.width - target_x;
             }
 
             if (width <= 0) {
@@ -91,7 +91,7 @@ namespace MicroTwenty
                 target_y = 0;
             }
             if (target_y + height >= targetTexture.height) {
-                height = targetTexture.height - target_y - 1;
+                height = targetTexture.height - target_y;
             }
 
             if (height <= 0) {

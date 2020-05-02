@@ -79,6 +79,13 @@ namespace MicroTwenty
             return children [children.Count - 1];
         }
 
+        public MenuObject ClearItems ()
+        {
+            childLookup.Clear ();
+            children.Clear ();
+            return this;
+        }
+
         public bool HasChildren ()
         {
             return children.Count > 0;

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace MicroTwenty
@@ -21,12 +22,15 @@ namespace MicroTwenty
         public WeaponRep CurrentWeapon { get; private set; }
         public ArmorRep CurrentArmor { get; private set; }
 
+        public List<SpellRep> SpellList { get; private set; }
+
         public CharRep (string name, HexCoord pos, 
             int curHealth, int maxHealth, 
             int curMana, int maxMana,
             int initiative, int moveSpeed,
             int lastTurnMoved, int teamIndex,
-            WeaponRep weapon, ArmorRep armor)
+            WeaponRep weapon, ArmorRep armor,
+            List<SpellRep> spellList)
         {
             Name = name;
             Position = pos;
@@ -42,6 +46,8 @@ namespace MicroTwenty
 
             CurrentWeapon = weapon;
             CurrentArmor = armor;
+
+            SpellList = spellList;
         }
 
         public float GetExpectedDamage ()
@@ -56,7 +62,7 @@ namespace MicroTwenty
                 CurrentMana, MaxMana, 
                 Initiative, MoveSpeed, 
                 LastTurnMoved, TeamIndex,
-                CurrentWeapon, CurrentArmor);
+                CurrentWeapon, CurrentArmor, SpellList);
         }
 
         public CharRep SetLastTurn (int currentTurn)
@@ -125,6 +131,15 @@ namespace MicroTwenty
             return c;
         }
 
+        public CharRep AddSpell (SpellRep newSpell)
+        {
+            var c = MakeCopy ();
+            c.SpellList = new List<SpellRep> (c.SpellList) {
+                newSpell
+            };
+            return c;
+        }
+
         public override bool Equals (object otherObject)
         {
             var otherChar = otherObject as CharRep;
@@ -159,7 +174,8 @@ namespace MicroTwenty
                 23 * TeamIndex +
                 29 * LastTurnMoved +
                 31 * CurrentWeapon.GetHashCode () +
-                37 * CurrentArmor.GetHashCode ();
+                37 * CurrentArmor.GetHashCode () +
+                41 * SpellList.GetHashCode ();
         }
 
         public bool IsAlive ()

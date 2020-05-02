@@ -56,6 +56,7 @@ namespace MicroTwenty
         SPRITE_ARROW_EW = 44,
         SPRITE_ARROW_SWNE = 45,
         SPRITE_ARROW_NWSE = 46,
+        SPRITE_BALL = 47,
     };
 
     public enum ScreenId
@@ -262,6 +263,7 @@ namespace MicroTwenty
             maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (1, -8, 7), "ep_1", new HexCoord (0, -4, 4)));
             maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (1, 2, -3), "ep1d_rathole", new HexCoord (0, -2, 2)));
             maps [i].dynamicObjects.Add (new CombatTrigger (_gameMgr, new HexCoord (-2, 3, -1), "combat", new HexCoord (0, 0, 0)));
+            maps [i].dynamicObjects.Add (new CombatTrigger (_gameMgr, new HexCoord (2, 3, -5), "bigcombat", new HexCoord (0, 0, 0)));
             maps [i].dynamicObjects.Add (new Signpost (_gameMgr, new HexCoord (2, -1, -1), "Signpost", new List<string> {
                 "A sign says",
                 "'Hello, Adventurer'." }));
@@ -965,10 +967,10 @@ namespace MicroTwenty
             SetPlayerPos (destMapCoord);
         }
 
-        internal void EnterCombat ()
+        internal void EnterCombat (string destMapName)
         {
             if (_combatMgr == null) {
-                _combatMgr = new CombatMgr (this, _gameMgr);
+                _combatMgr = new CombatMgr (this, _gameMgr, destMapName);
             }
             _combatMgr.InCombat = true;
         }

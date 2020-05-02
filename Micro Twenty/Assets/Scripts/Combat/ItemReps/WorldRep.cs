@@ -147,6 +147,28 @@ namespace MicroTwenty
             return newWorld;
         }
 
+        public WorldRep IncrementHealthOfTarget (int targetCharIndex, int deltaHealth)
+        {
+            var newWorld = MakeCopy ();
+            var oldChar = newWorld.Chars [targetCharIndex];
+            var newChar = oldChar.IncrementHealth (deltaHealth);
+            List<CharRep> newCharList = new List<CharRep> (newWorld.Chars) {
+                [targetCharIndex] = newChar
+            };
+            newWorld.Chars = newCharList;
+            return newWorld;
+        }
+
+        public int FindIndexOfChar (CharRep c)
+        {
+            for (int i = 0; i < Chars.Count; ++i) {
+                if (Chars [i].Equals (c)) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
         public WorldRep IncrementTurn ()
         {
             var c = MakeCopy ();
@@ -185,6 +207,20 @@ namespace MicroTwenty
             for (int i = 0; i < Chars.Count; ++i) {
                 if ((Chars [i].TeamIndex != movingTeam) && 
                     (Chars[i].IsAlive())) {
+                    outList.Add (i);
+                }
+            }
+            return outList;
+        }
+
+        public List<int> GetFriendlyIndices (int movingUnitIndex)
+        {
+            var outList = new List<int> ();
+            var movingTeam = Chars [movingUnitIndex].TeamIndex;
+
+            for (int i = 0; i < Chars.Count; ++i) {
+                if ((Chars [i].TeamIndex == movingTeam) &&
+                    (Chars [i].IsAlive ())) {
                     outList.Add (i);
                 }
             }

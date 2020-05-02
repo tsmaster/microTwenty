@@ -16,7 +16,7 @@ namespace MicroTwenty
         public override void Update (float deltaSeconds)
         {
             gameMgr.TeleportPlayer (destMapName, destMapCoord);
-            gameMgr.EnterCombat ();
+            gameMgr.EnterCombat (destMapName);
             this.isDone = true;
         }
     }

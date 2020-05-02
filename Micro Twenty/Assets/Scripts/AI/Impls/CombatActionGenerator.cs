@@ -13,6 +13,8 @@ namespace MicroTwenty
             actions.AddRange (GenerateRangedAttackWeakestMoves (gameState));
             //actions.AddRange (GenerateMoveToWeakestMoves (gameState, false));
             actions.AddRange (GenerateMoveToClosestActions (gameState, false));
+            actions.AddRange (GenerateHostileSpellToClosestActions (gameState));
+            actions.AddRange (GenerateFriendlySpellToWeakestActions (gameState));
             if (actions.Count == 0) {
                 actions.Add (new PassAction (gameState.GetIndexOfMovingUnit ()));
             }
@@ -192,6 +194,108 @@ namespace MicroTwenty
 
             return outList;
         }
+
+        public List<ICombatAction> GenerateHostileSpellToClosestActions (WorldRep gameState)
+        {
+            var outList = new List<ICombatAction> ();
+            var movingUnitIndex = gameState.GetIndexOfMovingUnit ();
+
+            if (movingUnitIndex == -1) {
+                return outList;
+            }
+
+            var movingUnit = gameState.Chars [movingUnitIndex];
+
+            foreach (var spell in movingUnit.SpellList) {
+                if (!spell.AllowHostile) {
+                    continue;
+                }
+
+                // todo add range
+                var enemyIndices = gameState.GetEnemyIndices (movingUnitIndex);
+
+                int lowestDistance = -1;
+                bool foundAny = false;
+
+                // find the lowest health value
+                foreach (var enemyIndex in enemyIndices) {
+                    var adjChar = gameState.Chars [enemyIndex];
+                    var dist = adjChar.Position.DistanceTo (movingUnit.Position);
+                    if ((!foundAny) ||
+                        (dist < lowestDistance)) {
+                        foundAny = true;
+                        lowestDistance = dist;
+                    }
+                }
+
+                Debug.Assert (foundAny);
+                Debug.Assert (lowestDistance > 0);
+
+                // for each enemy tied for weakest, return an order to attack that enemy
+                foreach (var i in enemyIndices) {
+                    var c = gameState.Chars [i];
+                    var dist = c.Position.DistanceTo (movingUnit.Position);
+                    if (dist != lowestDistance) {
+                        continue;
+                    }
+                    outList.Add (new SpellActionImpl (movingUnitIndex, i, spell));
+                }
+            }
+
+            return outList;
+        }
+
+        public List<ICombatAction> GenerateFriendlySpellToWeakestActions (WorldRep gameState)
+        {
+            var outList = new List<ICombatAction> ();
+            var movingUnitIndex = gameState.GetIndexOfMovingUnit ();
+
+            if (movingUnitIndex == -1) {
+                return outList;
+            }
+
+            var movingUnit = gameState.Chars [movingUnitIndex];
+
+            foreach (var spell in movingUnit.SpellList) {
+                if (!spell.AllowFriendly) {
+                    continue;
+                }
+
+                // todo add range
+                var enemyIndices = gameState.GetFriendlyIndices (movingUnitIndex);
+
+                float lowestHealth = -1;
+                bool foundAny = false;
+
+                // find the lowest health value
+                foreach (var enemyIndex in enemyIndices) {
+                    var adjChar = gameState.Chars [enemyIndex];
+                    var healthFrac = adjChar.CurrentHealth / (float)adjChar.MaxHealth;
+
+                    if ((!foundAny) ||
+                        (healthFrac < lowestHealth)) {
+                        foundAny = true;
+                        lowestHealth = healthFrac;
+                    }
+                }
+
+                Debug.Assert (foundAny);
+                Debug.Assert (lowestHealth > 0);
+
+                // for each enemy tied for weakest, return an order to attack that enemy
+                foreach (var i in enemyIndices) {
+                    var c = gameState.Chars [i];
+                    var healthFrac = c.CurrentHealth / (float)c.MaxHealth;
+                    if (healthFrac > lowestHealth + 0.1f) {
+                        continue;
+                    }
+                    outList.Add (new SpellActionImpl (movingUnitIndex, i, spell));
+                }
+            }
+
+            return outList;
+        }
+
 
 
         public List<ICombatAction> GenerateMoveToWeakestMoves (WorldRep gameState, bool verbose)

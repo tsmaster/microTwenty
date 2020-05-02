@@ -21,6 +21,8 @@ namespace MicroTwenty
 
         private MenuObject _combatMenu;
 
+        private string _mapName;
+
         public bool InCombat {
             get { return _inCombat; }
             set {
@@ -88,7 +90,7 @@ namespace MicroTwenty
         private const int LOG_LINE_MAX_LENGTH = 32;
         private const int LOG_LINE_MAX_LINES = 6;
 
-        public CombatMgr (MapManager mapManager, GameMgr gameMgr)
+        public CombatMgr (MapManager mapManager, GameMgr gameMgr, String destMapName)
         {
             _mapManager = mapManager;
             _gameMgr = gameMgr;
@@ -124,6 +126,8 @@ namespace MicroTwenty
             _orderUiPhase = OrderUiPhase.INVALID;
 
             _selector = null;
+
+            _mapName = destMapName;
         }
 
         internal void AddLogLineFormat (string templ, params object [] parList)
@@ -186,7 +190,9 @@ namespace MicroTwenty
             AddUnit ("Stan", t0Starts[0], SpriteId.SPRITE_COMBAT_GUY_1, 0, 3).AddWeapon(WeaponRep.MakeBow()).AddArmor(ArmorRep.MakeLeatherArmor());
             AddUnit ("Kim", t0Starts [1], SpriteId.SPRITE_COMBAT_GUY_2, 0, 3).AddWeapon (WeaponRep.MakeBow ()).AddArmor (ArmorRep.MakeLeatherArmor ());
             AddUnit ("Flexo", t0Starts [2], SpriteId.SPRITE_COMBAT_GUY_3, 0, 2).AddWeapon (WeaponRep.MakeSword ()).AddArmor (ArmorRep.MakeLeatherArmor ());
-            AddUnit ("Mags", t0Starts [3], SpriteId.SPRITE_COMBAT_GUY_4, 0, 3).AddWeapon (WeaponRep.MakeStaff ()).AddArmor (ArmorRep.MakeClothArmor ());
+            AddUnit ("Mags", t0Starts [3], SpriteId.SPRITE_COMBAT_GUY_4, 0, 3).
+                AddWeapon (WeaponRep.MakeStaff ()).AddArmor (ArmorRep.MakeClothArmor ()).
+                AddSpell(SpellRep.MakeFireballSpell()).AddSpell(SpellRep.MakeHealSpell());
             AddUnit ("Torso", t0Starts [4], SpriteId.SPRITE_COMBAT_GUY_5, 0, 2).AddWeapon (WeaponRep.MakeSword ()).AddArmor (ArmorRep.MakePlateArmor ());
             AddUnit ("Belto", t0Starts [5], SpriteId.SPRITE_COMBAT_GUY_6, 0, 2).AddWeapon (WeaponRep.MakeSword ()).AddArmor (ArmorRep.MakeChainArmor ());
 
@@ -196,7 +202,12 @@ namespace MicroTwenty
             var monsterGenerationStrategy = UnityEngine.Random.Range(0,3);
 
             // HACK HACK HACK
-            monsterGenerationStrategy = 2;
+
+            if (_mapName == "combat") {
+                monsterGenerationStrategy = 2;
+            } else if (_mapName == "bigcombat") {
+                monsterGenerationStrategy = 3;
+            }
 
             switch (monsterGenerationStrategy) {
             case 0:
@@ -227,6 +238,15 @@ namespace MicroTwenty
                 AddUnit ("Skeleton Archer", t1Starts [4], SpriteId.SPRITE_COMBAT_SKELETON_ARCHER, 1, 3).AddWeapon (WeaponRep.MakeBow ());
                 AddUnit ("Skeleton Archer", t1Starts [5], SpriteId.SPRITE_COMBAT_SKELETON_ARCHER, 1, 3).AddWeapon (WeaponRep.MakeBow ());
                 break;
+            case 3:
+                AddUnit ("Ratman", t1Starts [0], SpriteId.SPRITE_COMBAT_RAT_MAN, 1, 3).AddWeapon (WeaponRep.MakeSword ());
+                AddUnit ("Ratman", t1Starts [1], SpriteId.SPRITE_COMBAT_RAT_MAN, 1, 3).AddWeapon (WeaponRep.MakeSword ());
+                AddUnit ("Ratman", t1Starts [2], SpriteId.SPRITE_COMBAT_RAT_MAN, 1, 3).AddWeapon (WeaponRep.MakeSword ());
+                AddUnit ("Staff", t1Starts [3], SpriteId.SPRITE_COMBAT_STAFF, 1, 3).AddWeapon (WeaponRep.MakeStaff ()).AddSpell (SpellRep.MakeFireballSpell ()).AddSpell (SpellRep.MakeHealSpell ());
+                AddUnit ("Staff", t1Starts [4], SpriteId.SPRITE_COMBAT_STAFF, 1, 3).AddWeapon (WeaponRep.MakeStaff ()).AddSpell(SpellRep.MakeFireballSpell()).AddSpell(SpellRep.MakeHealSpell());
+                break;
+
+
             }
 
             BdgRandom.ShuffleList (units);
@@ -404,6 +424,19 @@ namespace MicroTwenty
 
             _combatMenu ["Melee Attack"].SetEnabled ((weapon != null) && (!weapon.IsRanged));
             _combatMenu ["Ranged Attack"].SetEnabled ((weapon != null) && (weapon.IsRanged));
+
+            if (unit.Spells.Count == 0) {
+                _combatMenu ["Cast Magic"].SetEnabled (false);
+            } else {
+                _combatMenu ["Cast Magic"].SetEnabled (true).ClearItems ().SetWindow(2, 4);
+
+                for (int spellIndex = 0; spellIndex < unit.Spells.Count; ++ spellIndex) {
+                    var spell = unit.Spells [spellIndex];
+                    _combatMenu ["Cast Magic"].AddItem (spell.Name).SetItemId(1000 + spellIndex);
+                }
+            }
+
+            _combatMenu.Build ();
         }
 
         private bool IsTeamAi (int teamIndex)
@@ -473,58 +506,86 @@ namespace MicroTwenty
             if (Input.GetKeyDown (KeyCode.Return)) {
                 var res = _menuMgr.OnActivate ();
 
-                switch (res.GetItemId ()) {
-                case (int)OrderMenuItemId.MOVE:
-                    // move selected
+                if (res != null) {
+                    var activatedItemId = res.GetItemId ();
 
                     var nextCharIndex = GetNextUnitIndex ();
                     var nextChar = units [nextCharIndex];
 
-                    var myLoc = nextChar.GetHexCoord ();
-                    var walkableDict = MakeWalkableDict ();
-                    walkableDict [myLoc] = true;
+                    if ((activatedItemId >= 1000) &&
+                        (activatedItemId < 1000 + nextChar.Spells.Count)) {
+                        // spell selected
 
-                    var sources = new List<HexCoord> {
+                        var spellIndex = activatedItemId - 1000;
+                        var spell = nextChar.Spells [spellIndex];
+
+                        // TODO spell range
+                        _selector = new RangedTargetSelectionMode (nextCharIndex, _mapManager, this, 1, 10, 
+                            spell.AllowFriendly, spell.AllowHostile);
+                        _selector.OnLocationSelected += (hc) => { OnSelectedMagicTarget (hc, spell); };
+                        _orderUiPhase = OrderUiPhase.CURSOR;
+                        return;
+                    }
+
+                    switch (activatedItemId) {
+                    case (int)OrderMenuItemId.MOVE:
+                        // move selected
+                        var myLoc = nextChar.GetHexCoord ();
+                        var walkableDict = MakeWalkableDict ();
+                        walkableDict [myLoc] = true;
+
+                        var sources = new List<HexCoord> {
                         myLoc };
 
-                    Dictionary<HexCoord, int> ff = MakeFloodFill (sources, walkableDict);
-                    _selector = new MovementSelectionMode (nextCharIndex, _mapManager, this, ff);
-                    _selector.OnLocationSelected += OnSelectedMoveDestination;
-                    _orderUiPhase = OrderUiPhase.CURSOR;
-                    break;
-                case (int)OrderMenuItemId.RANGE:
-                    // ranged attack selected
-                    var unitIndex = GetNextUnitIndex ();
-                    var weapon = units [unitIndex].weapon;
-                    _selector = new RangedTargetSelectionMode (GetNextUnitIndex (), _mapManager, this, weapon.MinRange, weapon.MaxRange);
-                    _selector.OnLocationSelected += OnSelectedRangedTarget;
-                    _orderUiPhase = OrderUiPhase.CURSOR;
-                    break;
-                case (int)OrderMenuItemId.MELEE:
-                    // melee attack selected
-                    _selector = new MeleeTargetSelectionMode (GetNextUnitIndex(), _mapManager, this);
-                    _selector.OnLocationSelected += OnSelectedMeleeTarget;
-                    _orderUiPhase = OrderUiPhase.CURSOR;
-                    break;
-                case (int)OrderMenuItemId.MAGIC:
-                    // magic selected
-                    break;
-                case (int)OrderMenuItemId.ITEM:
-                    // use item selected
-                    break;
-                case (int)OrderMenuItemId.DEFEND:
-                    // defend selected
-                    _currentOrder = new PassOrder (units [GetNextUnitIndex ()]);
-                    break;
-                default:
-                    // unknown action selected
-                    break;
+                        Dictionary<HexCoord, int> ff = MakeFloodFill (sources, walkableDict);
+                        _selector = new MovementSelectionMode (nextCharIndex, _mapManager, this, ff);
+                        _selector.OnLocationSelected += OnSelectedMoveDestination;
+                        _orderUiPhase = OrderUiPhase.CURSOR;
+                        break;
+                    case (int)OrderMenuItemId.RANGE:
+                        // ranged attack selected
+                        var unitIndex = GetNextUnitIndex ();
+                        var weapon = units [unitIndex].weapon;
+                        _selector = new RangedTargetSelectionMode (GetNextUnitIndex (), _mapManager, this, 
+                            weapon.MinRange, weapon.MaxRange, false, true);
+                        _selector.OnLocationSelected += OnSelectedRangedTarget;
+                        _orderUiPhase = OrderUiPhase.CURSOR;
+                        break;
+                    case (int)OrderMenuItemId.MELEE:
+                        // melee attack selected
+                        _selector = new MeleeTargetSelectionMode (GetNextUnitIndex (), _mapManager, this);
+                        _selector.OnLocationSelected += OnSelectedMeleeTarget;
+                        _orderUiPhase = OrderUiPhase.CURSOR;
+                        break;
+                    case (int)OrderMenuItemId.MAGIC:
+                        // magic selected
+                        break;
+                    case (int)OrderMenuItemId.ITEM:
+                        // use item selected
+                        break;
+                    case (int)OrderMenuItemId.DEFEND:
+                        // defend selected
+                        _currentOrder = new PassOrder (units [GetNextUnitIndex ()]);
+                        break;
+                    default:
+                        // unknown action selected
+                        break;
+                    }
                 }
             }
             if (Input.GetKeyDown (KeyCode.Escape)) {
                 // maybe don't allow this?
                 _menuMgr.OnBack ();
             }
+        }
+
+        private void OnSelectedMagicTarget (HexCoord hc, SpellRep spell)
+        {
+            var nextUnitIndex = GetNextUnitIndex ();
+            var attacker = units [nextUnitIndex];
+            var target = GetCombatUnitByLocation (hc);
+
+            _currentOrder = new ParticleOrder (_mapManager, attacker, target, spell.Sprite, spell.SpriteColor, spell.HitAction);
         }
 
         private void OnSelectedMeleeTarget (HexCoord hc)
@@ -834,7 +895,7 @@ namespace MicroTwenty
                     unit.GetHexCoord (), 
                     unit.currentHP, unit.maxHP,
                     unit.GetInitiative (), unit.GetLastTurnMoved (),
-                    unit.maxMove);
+                    unit.maxMove, unit.Spells);
                 charRep = charRep.SetWeapon (unit.weapon).SetArmor (unit.armor);
                 charList.Add (charRep);
             }
@@ -859,7 +920,7 @@ namespace MicroTwenty
             int teamIndex, HexCoord position, 
             int currentHealth, int maxHealth,
             int initiative, int lastTurnMoved, 
-            int moveSpeed)
+            int moveSpeed, List<SpellRep> spellList)
         {
             var weapon = new WeaponFistRep ();
             var armor = new ArmorClothRep ();
@@ -869,7 +930,7 @@ namespace MicroTwenty
                 0, 0, 
                 initiative, moveSpeed, 
                 lastTurnMoved, teamIndex, 
-                weapon, armor);
+                weapon, armor, spellList);
         }
 
         private List<CombatUnit> GetEnemiesAdjacentTo (HexCoord startCoord, int myTeamId)
@@ -912,15 +973,28 @@ namespace MicroTwenty
 
         internal List<int> GetEnemyIndicesInRange (HexCoord startCoord, int myTeamId, int minRange, int maxRange)
         {
+            return GetIndicesInRange (startCoord, minRange, maxRange).FindAll ((index) => {
+                var unit = units [index];
+                return unit.GetTeamID () != myTeamId;
+            });
+        }
+
+        internal List<int> GetFriendlyIndicesInRange (HexCoord startCoord, int myTeamId, int minRange, int maxRange)
+        {
+            return GetIndicesInRange (startCoord, minRange, maxRange).FindAll ((index) => {
+                var unit = units [index];
+                return unit.GetTeamID () == myTeamId;
+            });
+        }
+
+        internal List<int> GetIndicesInRange (HexCoord startCoord, int minRange, int maxRange)
+        {
             var outList = new List<int> ();
 
             for (int i = 0; i < units.Count; ++i) {
                 var unit = units [i];
 
                 if (!unit.IsAlive ()) {
-                    continue;
-                }
-                if (unit.GetTeamID () == myTeamId) {
                     continue;
                 }
 

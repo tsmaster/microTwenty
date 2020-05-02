@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace MicroTwenty
 {
@@ -20,6 +21,8 @@ namespace MicroTwenty
 
         public int maxMove;
 
+        public List<SpellRep> Spells;
+
 
         public CombatUnit (string unitName, HexCoord hexCoord, int teamIndex, CombatantSprite sprite, int maxMove)
         {
@@ -32,6 +35,7 @@ namespace MicroTwenty
             this.weapon = new WeaponFistRep ();
             this.armor = new ArmorClothRep ();
             this.maxMove = maxMove;
+            this.Spells = new List<SpellRep> ();
         }
 
         public HexCoord GetHexCoord ()
@@ -94,6 +98,12 @@ namespace MicroTwenty
         public CombatUnit AddArmor (ArmorRep ar)
         {
             armor = ar;
+            return this;
+        }
+
+        public CombatUnit AddSpell (SpellRep sr)
+        {
+            Spells.Add (sr);
             return this;
         }
     }

@@ -11,9 +11,9 @@ namespace MicroTwenty
         private CombatMgr _combatMgr;
         private CombatUnit _movingUnit;
         private int _moveCount;
-        private List<HexCoord> _enemyLocs;
+        private List<HexCoord> _targetLocs;
 
-        public RangedTargetSelectionMode (int movingUnitIndex, MapManager mapManager, CombatMgr combatMgr, int minRange, int maxRange)
+        public RangedTargetSelectionMode (int movingUnitIndex, MapManager mapManager, CombatMgr combatMgr, int minRange, int maxRange, bool allowFriendly, bool allowHostile)
         {
             _movingUnitIndex = movingUnitIndex;
             _mapManager = mapManager;
@@ -22,20 +22,26 @@ namespace MicroTwenty
             _movingUnit = _combatMgr.GetCombatUnitByIndex (movingUnitIndex);
             _moveCount = _movingUnit.maxMove;
 
-            var rangedEnemyIndices = combatMgr.GetEnemyIndicesInRange (_movingUnit.GetHexCoord(), _movingUnit.GetTeamID(), minRange, maxRange);
+            var rangedUnitIndices = combatMgr.GetIndicesInRange (_movingUnit.GetHexCoord(), minRange, maxRange);
 
-            _enemyLocs = new List<HexCoord> ();
-            foreach (var enemyIndex in rangedEnemyIndices) {
-                var enemy = combatMgr.GetCombatUnitByIndex (enemyIndex);
-                var enemyLoc = enemy.GetHexCoord ();
+            _targetLocs = new List<HexCoord> ();
+            foreach (var targetIndex in rangedUnitIndices) {
+                var target = combatMgr.GetCombatUnitByIndex (targetIndex);
+                var targetLoc = target.GetHexCoord ();
 
-                if (!IsLOSBlocked (_movingUnit.GetHexCoord (), enemyLoc)) {
-                    _enemyLocs.Add (enemyLoc);
+                bool targetIsFriendly = target.GetTeamID () == _movingUnit.GetTeamID ();
+                if ((targetIsFriendly && (!allowFriendly)) ||
+                    (!targetIsFriendly) && (!allowHostile)) {
+                    continue;
+                }
+
+                if (!IsLOSBlocked (_movingUnit.GetHexCoord (), targetLoc)) {
+                    _targetLocs.Add (targetLoc);
                 }
             }
 
-            if (_enemyLocs.Count > 0) {
-                CursorPos = _enemyLocs[0];
+            if (_targetLocs.Count > 0) {
+                CursorPos = _targetLocs[0];
             } else {
                 CursorPos = combatMgr.GetCombatUnitByIndex (movingUnitIndex).GetHexCoord ();
             }
@@ -75,7 +81,7 @@ namespace MicroTwenty
 
         public override bool IsLocationSelectable (HexCoord hc)
         {
-            return (_enemyLocs.Contains (hc));
+            return (_targetLocs.Contains (hc));
         }
     }
 }
