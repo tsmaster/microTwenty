@@ -228,7 +228,7 @@ namespace MicroTwenty
             _mainMenu ["Combat"] ["Wield"].AddItem ("Flm Sword");
             _mainMenu.AddItem ("Lore");
             _mainMenu.AddItem ("Help");
-            _mainMenu.AddItem ("Cheat");
+            _mainMenu.AddItem ("Cheat").SetWindow(1,2);
             _mainMenu ["Cheat"] ["Teleport"].SetWindow (2, 8);
             _mainMenu ["Cheat"] ["Teleport"] ["ep_1"].SetItemId (1000);
             _mainMenu ["Cheat"] ["Teleport"] ["ep_2"].SetItemId (1001);
@@ -246,6 +246,10 @@ namespace MicroTwenty
             _mainMenu ["Cheat"] ["Teleport"] ["c_ryc"].SetItemId (3001);
             _mainMenu ["Cheat"] ["Teleport"] ["d_hole"].SetItemId (3002);
             _mainMenu ["Cheat"] ["Teleport"] ["rat isl"].SetItemId (3003);
+            _mainMenu ["Cheat"] ["FUNDS"].SetItemId (102);
+            _mainMenu ["Save/Load"].SetWindow (1, 2);
+            _mainMenu ["Save/Load"] ["Load"].SetItemId (100);
+            _mainMenu ["Save/Load"] ["Save"].SetItemId (101);
             _mainMenu.AddItem ("Debug");
             _mainMenu.AddItem ("Quit");
             _mainMenu.Build ();
@@ -508,6 +512,25 @@ namespace MicroTwenty
                     if (result != null) {
                         var resId = result.GetItemId ();
                         switch (resId) {
+
+                        case 100:
+                            // load savegame
+                            Debug.Log ("Load savegame");
+                            _gameMgr.LoadGame ();
+                            break;
+
+                        case 101:
+                            // save savegame
+                            Debug.Log ("Save savegame");
+                            _gameMgr.SaveGame ();
+                            break;
+
+                        case 102:
+                            // cheat/funds
+                            Debug.Log ("Cheat add funds");
+                            _gameMgr.Party.money += 10000;
+                            break;
+
                         case 1000:
                             // teleport to EP_1
                             _gameMgr.AddCommand (new TeleportCommand ("teleport", _gameMgr, "ep_1", new HexCoord (0, 0, 0)));
@@ -1024,6 +1047,11 @@ namespace MicroTwenty
         internal Texture2D GetRatKingBitmap ()
         {
             return ratKingTexture;
+        }
+
+        internal GameMgr GetGameManager ()
+        {
+            return _gameMgr;
         }
     }
 }

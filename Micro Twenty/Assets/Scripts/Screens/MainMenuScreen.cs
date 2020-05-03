@@ -21,10 +21,12 @@ namespace MicroTwenty
         {
             _mapManager = mapManager;
 
+            var gameMgr = mapManager.GetGameManager ();
+
             _menuMgr = new MenuManager (mapManager.GetMenuBitmap (), mapManager.GetFontBitmap ());
             _mainMenu = new MenuObject("main_menu", mapManager.GetMenuBitmap (), mapManager.GetFontBitmap ());
             _mainMenu.SetWindow (1, 3);
-            _mainMenu.AddItem ("Load Saved Game").SetItemId((int)MenuOptions.LoadSavedGame).SetEnabled (false);
+            _mainMenu.AddItem ("Load Saved Game").SetItemId((int)MenuOptions.LoadSavedGame).SetEnabled (gameMgr.SaveGameAvailable());
             _mainMenu.AddItem ("Start New Game").SetItemId ((int)MenuOptions.StartNewGame);
             _mainMenu.AddItem ("Credits").SetItemId ((int)MenuOptions.Credits);
             _mainMenu.AddItem ("Quit to BDGos").SetItemId ((int)MenuOptions.Quit).SetEnabled (false);
@@ -74,6 +76,8 @@ namespace MicroTwenty
                         _mapManager.ShowScreen (ScreenId.NoIntroGameScreen);
                         break;
                     case (int)MenuOptions.LoadSavedGame:
+                        _mapManager.GetGameManager ().LoadGame ();
+                        _mapManager.ShowScreen (ScreenId.NoIntroGameScreen);
                         break;
                     case (int)MenuOptions.Credits:
                         _mapManager.ShowScreen (ScreenId.CreditsScreen);
