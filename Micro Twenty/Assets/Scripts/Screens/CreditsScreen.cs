@@ -22,6 +22,11 @@ namespace MicroTwenty
             _elapsedSeconds = 0.0f;
             _fontTexture = mapManager.GetFontBitmap ();
 
+            var weaponJSON = Resources.Load<TextAsset> ("JSON/weapons");
+            var weaponTable = JsonUtility.FromJson<WeaponSheet> (weaponJSON.text);
+            Debug.Log ("loaded weapons");
+            Debug.LogFormat ("weapon 0: {0}", weaponTable.weapons [0].Name);
+
             _slideY = 0.0f;
 
             _credits = new List<string>{
