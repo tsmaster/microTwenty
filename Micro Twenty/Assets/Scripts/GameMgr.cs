@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
+using System.IO.Compression;
+using System.Text;
 using UnityEngine;
 
 namespace MicroTwenty
@@ -58,12 +59,14 @@ namespace MicroTwenty
         {
             Debug.Log ("Loading Game");
             if (SaveGameAvailable ()) {
-                BinaryFormatter bf = new BinaryFormatter ();
-                FileStream file = File.Open (Application.persistentDataPath + "/gamesave.save", FileMode.Open);
-                Party = (Party)bf.Deserialize (file);
-                file.Close ();
+                var compressedSaveGameString = PlayerPrefs.GetString ("savegame");
+                var jsonStr = DecompressString (compressedSaveGameString);
+
+                Party = JsonUtility.FromJson<Party> (jsonStr);
+
                 Debug.Log ("Game Loaded");
                 Debug.LogFormat ("Party funds are {0}", Party.money);
+
             } else {
                 Debug.Log ("No game available");
             }
@@ -71,17 +74,74 @@ namespace MicroTwenty
 
         public bool SaveGameAvailable ()
         {
-            return (File.Exists (Application.persistentDataPath + "/gamesave.save"));
+            //return (File.Exists (Application.persistentDataPath + "/gamesave.save"));
+
+            var saveGameString = PlayerPrefs.GetString ("savegame");
+            return ((saveGameString != null) &&
+                (saveGameString.Length > 0));
         }
 
         public void SaveGame ()
         {
             Debug.Log ("Saving Game");
-            BinaryFormatter bf = new BinaryFormatter ();
-            FileStream file = File.Create (Application.persistentDataPath + "/gamesave.save");
-            bf.Serialize (file, Party);
-            file.Close ();
+
+            var json = JsonUtility.ToJson (Party);
+
+            var gzippedStr = CompressString (json);
+
+            Debug.LogFormat ("json len: {0} zip len: {1}", json.Length, gzippedStr.Length);
+
+            PlayerPrefs.SetString ("savegame", gzippedStr);
+
             Debug.Log ("Game Saved");
+        }
+
+        /// <summary>
+        /// Compresses the string.
+        /// </summary>
+        /// <param name="text">The text.</param>
+        /// <returns></returns>
+        public static string CompressString (string text)
+        {
+            byte [] buffer = Encoding.UTF8.GetBytes (text);
+            var memoryStream = new MemoryStream ();
+            using (var gZipStream = new GZipStream (memoryStream, CompressionMode.Compress, true)) {
+                gZipStream.Write (buffer, 0, buffer.Length);
+            }
+
+            memoryStream.Position = 0;
+
+            var compressedData = new byte [memoryStream.Length];
+            memoryStream.Read (compressedData, 0, compressedData.Length);
+
+            var gZipBuffer = new byte [compressedData.Length + 4];
+            Buffer.BlockCopy (compressedData, 0, gZipBuffer, 4, compressedData.Length);
+            Buffer.BlockCopy (BitConverter.GetBytes (buffer.Length), 0, gZipBuffer, 0, 4);
+            return Convert.ToBase64String (gZipBuffer);
+        }
+
+        /// <summary>
+        /// Decompresses the string.
+        /// </summary>
+        /// <param name="compressedText">The compressed text.</param>
+        /// <returns></returns>
+        public static string DecompressString (string compressedText)
+        {
+            byte [] gZipBuffer = Convert.FromBase64String (compressedText);
+            using (var memoryStream = new MemoryStream ()) {
+                int dataLength = BitConverter.ToInt32 (gZipBuffer, 0);
+                memoryStream.Write (gZipBuffer, 4, gZipBuffer.Length - 4);
+
+                var buffer = new byte [dataLength];
+
+                memoryStream.Position = 0;
+                using (var gZipStream = new GZipStream (memoryStream, CompressionMode.Decompress)) {
+                    gZipStream.Read (buffer, 0, buffer.Length);
+                }
+
+                return Encoding.UTF8.GetString (buffer);
+            }
         }
     }
 }
+
