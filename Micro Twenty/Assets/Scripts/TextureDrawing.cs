@@ -68,6 +68,34 @@ namespace MicroTwenty
             }
         }
 
+        internal static Texture2D DuplicateMur (Texture2D sourceTexture)
+        {
+            RenderTexture renderTex = RenderTexture.GetTemporary (
+                             sourceTexture.width,
+                             sourceTexture.height,
+                             0,
+                             RenderTextureFormat.Default,
+                             RenderTextureReadWrite.Linear);
+
+            Graphics.Blit (sourceTexture, renderTex);
+            RenderTexture previous = RenderTexture.active;
+            RenderTexture.active = renderTex;
+            Texture2D readableText = new Texture2D (sourceTexture.width, sourceTexture.height);
+            readableText.ReadPixels (new Rect (0, 0, renderTex.width, renderTex.height), 0, 0);
+            readableText.Apply ();
+            RenderTexture.active = previous;
+            RenderTexture.ReleaseTemporary (renderTex);
+            return readableText;
+        }
+
+        internal static Texture2D Duplicate (Texture2D sourceTexture)
+        {
+            Texture2D destTexture = new Texture2D (sourceTexture.width, sourceTexture.height);
+            Graphics.CopyTexture (sourceTexture, destTexture);
+            Debug.Assert (destTexture.isReadable);
+            return destTexture;
+        }
+
 
         static public void DrawPartialSprite (Texture2D targetTexture, Texture2D sourceTexture, 
             int target_x, int target_y, int source_x, int source_y, int width, int height)
@@ -173,6 +201,15 @@ namespace MicroTwenty
 
                 DrawTintedPartialSprite (targetTexture, fontTexture, pos_x, pos_y, c_col * 8, c_row * 8, 8, 8, color);
             }
+        }
+
+        static public void DrawCenteredStringAt (Texture2D targetTexture, Texture2D fontTexture, string message, int x, int y, Color color)
+        {
+            var msgLen = message.Length;
+            var offset = -(msgLen * 6) / 2;
+
+            DrawStringAt (targetTexture, fontTexture,
+                message, x + offset, y, color);
         }
     }
 }

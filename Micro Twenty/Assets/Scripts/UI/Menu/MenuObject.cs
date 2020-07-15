@@ -39,6 +39,7 @@ namespace MicroTwenty
 
         private int _numRows = 0;
         private int _itemId = -1;
+        private Action _action = null;
 
         public bool IsEnabled { get; set; }
 
@@ -113,6 +114,20 @@ namespace MicroTwenty
             if (children.Count % _cw_width != 0) {
                 _numRows += 1;
             }
+
+            // clamp cursor pos into valid space
+            if (_cursorRow >= _numRows) {
+                _cursorRow = Math.Min (_numRows - 1, _cursorRow);
+
+                _topRow = _cursorRow - _cw_height + 1;
+                _topRow = Math.Max (_topRow, 0);
+                CalcCursorIndex ();
+            }
+        }
+
+        internal void SetAction (Action action)
+        {
+            _action = action;
         }
 
         private string GetName ()
@@ -336,6 +351,7 @@ namespace MicroTwenty
             var child = children [_cursorIndex];
 
             if (child.IsEnabled) {
+                child._action?.Invoke ();
                 return child;
             } else {
                 return null;

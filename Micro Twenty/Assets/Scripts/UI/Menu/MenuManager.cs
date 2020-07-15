@@ -11,6 +11,12 @@ namespace MicroTwenty
         private bool _isOpen;
         private List<MenuObject> _menuStack;
 
+        private bool _dismissOnAction = true;
+        public bool DismissOnAction {
+            get { return _dismissOnAction; }
+            set { _dismissOnAction = value; }
+        }
+
         public MenuManager (Texture2D menuSprite, Texture2D fontSprite)
         {
             _menuSprite = menuSprite;
@@ -84,7 +90,9 @@ namespace MicroTwenty
                 _menuStack.Add (obj);
                 return null;
             } else {
-                CloseMenu ();
+                if (DismissOnAction) {
+                    CloseMenu ();
+                }
                 return obj;
             }
 

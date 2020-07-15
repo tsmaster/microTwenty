@@ -11,6 +11,10 @@ namespace MicroTwenty
     {
         private MapManager mapManager;
 
+        private WeaponDataManager _weaponDataManager;
+        private ArmorDataManager _armorDataManager;
+        private InventoryDataManager _inventoryDataManager;
+
         private List<Command> commands;
 
         public Party Party {get; set;}
@@ -18,13 +22,51 @@ namespace MicroTwenty
         public GameMgr (MapManager mapManager)
         {
             this.mapManager = mapManager;
-            this.commands = new List<Command> ();
+            _inventoryDataManager = new InventoryDataManager ();
+            _weaponDataManager = new WeaponDataManager (_inventoryDataManager);
+            _armorDataManager = new ArmorDataManager (_inventoryDataManager);
+            commands = new List<Command> ();
             Party = new Party ();
+            Party.Gold = 6000;
+
+            LoadData ();
+        }
+
+        public void LoadData ()
+        {
+            _weaponDataManager.Load ();
+            _armorDataManager.Load ();
+            _inventoryDataManager.Load ();
+        }
+
+        internal void EnterBuilding (String name, BuildingTrigger.BuildingType buildingType)
+        {
+            mapManager.EnterBuilding (name, buildingType);
+        }
+
+        internal void ExitBuilding ()
+        {
+            mapManager.ExitBuilding ();
         }
 
         internal void TeleportPlayer (string destMapName, HexCoord destMapCoord)
         {
             mapManager.TeleportPlayer (destMapName, destMapCoord);
+        }
+
+        public WeaponDataManager GetWeaponDataManager ()
+        {
+            return _weaponDataManager;
+        }
+
+        public ArmorDataManager GetArmorDataManager ()
+        {
+            return _armorDataManager;
+        }
+
+        public InventoryDataManager GetInventoryDataManager ()
+        {
+            return _inventoryDataManager;
         }
 
         internal MapManager GetMapManager ()
@@ -65,7 +107,7 @@ namespace MicroTwenty
                 Party = JsonUtility.FromJson<Party> (jsonStr);
 
                 Debug.Log ("Game Loaded");
-                Debug.LogFormat ("Party funds are {0}", Party.money);
+                Debug.LogFormat ("Party funds are {0}", Party.Gold);
 
             } else {
                 Debug.Log ("No game available");

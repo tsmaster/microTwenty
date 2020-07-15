@@ -62,7 +62,7 @@ namespace MicroTwenty
                     var wrappedJSON = "{\"weapons\": " + rawJSon + "}";
 
                     //Debug.Log ("Wrapped JSON");
-                    Debug.Log (wrappedJSON);
+                    //Debug.Log (wrappedJSON);
 
                     // Parse from json to the desired object type.
                     var weaponSheet = JsonUtility.FromJson<WeaponSheet> (wrappedJSON);

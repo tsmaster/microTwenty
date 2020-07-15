@@ -118,6 +118,7 @@ namespace MicroTwenty
         public MenuObject _mainMenu;
 
         public IIntroScreen _introScreen;
+        private BuildingUi _buildingUi;
 
         // Start is called before the first frame update
         void Start ()
@@ -247,6 +248,7 @@ namespace MicroTwenty
             _mainMenu ["Cheat"] ["Teleport"] ["d_hole"].SetItemId (3002);
             _mainMenu ["Cheat"] ["Teleport"] ["rat isl"].SetItemId (3003);
             _mainMenu ["Cheat"] ["FUNDS"].SetItemId (102);
+            _mainMenu ["Cheat"] ["Money=10"].SetItemId (103);
             _mainMenu ["Save/Load"].SetWindow (1, 2);
             _mainMenu ["Save/Load"] ["Load"].SetItemId (100);
             _mainMenu ["Save/Load"] ["Save"].SetItemId (101);
@@ -301,6 +303,12 @@ namespace MicroTwenty
             maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (-8, 3, 5), "ep_1", new HexCoord (0, -4, 4)));
             maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (-1, -10, 11), "ratisland", new HexCoord (-9, 9, 0)));
             maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (-6, -3, 9), "caverns", new HexCoord (-9, 1, 8)));
+            maps [i].dynamicObjects.Add (new BuildingTrigger (_gameMgr, new HexCoord (2, -2, 0), "La Healerie", BuildingTrigger.BuildingType.HEALING));
+            maps [i].dynamicObjects.Add (new BuildingTrigger (_gameMgr, new HexCoord (-3, 1, 2), "Jake's Pub n Grub", BuildingTrigger.BuildingType.PUB));
+            maps [i].dynamicObjects.Add (new BuildingTrigger (_gameMgr, new HexCoord (2, -5, 3), "Magic n Stuf", BuildingTrigger.BuildingType.MAGIC));
+            maps [i].dynamicObjects.Add (new BuildingTrigger (_gameMgr, new HexCoord (0, -6, 6), "Garth's Weapons", BuildingTrigger.BuildingType.WEAPONS));
+            maps [i].dynamicObjects.Add (new BuildingTrigger (_gameMgr, new HexCoord (-3, -4, 7), "Art's Armor", BuildingTrigger.BuildingType.ARMOR));
+            maps [i].dynamicObjects.Add (new BuildingTrigger (_gameMgr, new HexCoord (-6, -1, 7), "Rollo's Gear", BuildingTrigger.BuildingType.EQUIPMENT));
 
             i = GetMapByName ("ep1d_rathole");
             maps [i].dynamicObjects.Add (new TeleportTrigger (_gameMgr, new HexCoord (0, -2, 2), "ep_1", new HexCoord (1, 2, -3)));
@@ -401,6 +409,12 @@ namespace MicroTwenty
                 return;
             }
 
+            if (_buildingUi != null) {
+                _buildingUi.Draw ();
+                _buildingUi.Update (deltaSeconds);
+                return;
+            }
+
             //_gameMgr.Update (deltaSeconds);
             drawn = false;
 
@@ -479,6 +493,15 @@ namespace MicroTwenty
                     // go southeast
                     tryMove (new HexCoord (0, -1, 1));
                 }
+
+                if (Input.GetKeyDown (KeyCode.P)) {
+                    // show Party UI
+                    _gameMgr.AddCommand (new EnterBuildingCommand ("party", _gameMgr, BuildingTrigger.BuildingType.PARTY));
+                }
+                if (Input.GetKeyDown (KeyCode.O)) {
+                    // show Party UI
+                    _gameMgr.AddCommand (new EnterBuildingCommand ("paper doll", _gameMgr, BuildingTrigger.BuildingType.PAPERDOLL));
+                }
             }
 
             // Menu
@@ -528,7 +551,13 @@ namespace MicroTwenty
                         case 102:
                             // cheat/funds
                             Debug.Log ("Cheat add funds");
-                            _gameMgr.Party.money += 10000;
+                            _gameMgr.Party.Gold += 10000;
+                            break;
+
+                        case 103:
+                            // cheat/money=10
+                            Debug.Log ("Cheat set money to 10");
+                            _gameMgr.Party.Gold = 10;
                             break;
 
                         case 1000:
@@ -1052,6 +1081,43 @@ namespace MicroTwenty
         internal GameMgr GetGameManager ()
         {
             return _gameMgr;
+        }
+
+        internal void EnterBuilding (String name, BuildingTrigger.BuildingType buildingType)
+        {
+            switch (buildingType) {
+            case BuildingTrigger.BuildingType.HEALING:
+                _buildingUi = new HealingBuildingUi (name, _gameMgr);
+                break;
+            case BuildingTrigger.BuildingType.PUB:
+                _buildingUi = new PubBuildingUi (name, _gameMgr);
+                break;
+            case BuildingTrigger.BuildingType.MAGIC:
+                _buildingUi = new MagicBuildingUi (name, _gameMgr);
+                break;
+            case BuildingTrigger.BuildingType.WEAPONS:
+                _buildingUi = new WeaponBuildingUi (name, _gameMgr);
+                break;
+            case BuildingTrigger.BuildingType.ARMOR:
+                _buildingUi = new ArmorBuildingUi (name, _gameMgr);
+                break;
+            case BuildingTrigger.BuildingType.EQUIPMENT:
+                _buildingUi = new EquipmentBuildingUi (name, _gameMgr);
+                break;
+            case BuildingTrigger.BuildingType.PARTY:
+                _buildingUi = new PartyUi (_gameMgr);
+                break;
+            case BuildingTrigger.BuildingType.PAPERDOLL:
+                _buildingUi = new PaperDollUi (_gameMgr);
+                break;
+            default:
+                throw new NotImplementedException ();
+            }
+        }
+
+        public void ExitBuilding ()
+        {
+            _buildingUi = null;
         }
     }
 }

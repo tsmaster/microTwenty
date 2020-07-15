@@ -13,6 +13,7 @@ namespace MicroTwenty
         public int experiencePoints;
         public int level;
         public string Class;
-        public InventoryItem [] inventoryItems;
+        // TODO put items into specific places
+        //public IInventoryItem [] inventoryItems; 
     }
 }

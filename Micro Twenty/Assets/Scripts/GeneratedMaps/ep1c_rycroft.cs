@@ -226,7 +226,7 @@ namespace MicroTwenty {
       WoodWall(-9, 2, 7);
       Plain(-8, 1, 7);
       Building(-7, 0, 7);
-      Building(-6, -1, 7);
+      BuildingEntrance(-6, -1, 7);
       Plain(-5, -2, 7);
       Plain(-4, -3, 7);
       BuildingEntrance(-3, -4, 7);
