@@ -26,10 +26,26 @@ namespace MicroTwenty
             _weaponDataManager = new WeaponDataManager (_inventoryDataManager);
             _armorDataManager = new ArmorDataManager (_inventoryDataManager);
             commands = new List<Command> ();
+
+            LoadData ();
+
             Party = new Party ();
             Party.Gold = 6000;
 
-            LoadData ();
+
+            Character char0 = new Character ("Alex", 10);
+            Character char1 = new Character ("Bob", 10);
+            Character char2 = new Character ("Chad", 10);
+            Character char3 = new Character ("Dora", 10);
+            Character char4 = new Character ("Evy", 10);
+            Character char5 = new Character ("Finn", 10);
+
+            Party.AddCharacter (char0);
+            Party.AddCharacter (char1);
+            Party.AddCharacter (char2);
+            Party.AddCharacter (char3);
+            Party.AddCharacter (char4);
+            Party.AddCharacter (char5);
         }
 
         public void LoadData ()

@@ -7,7 +7,7 @@ namespace MicroTwenty
     [Serializable]
     public class Party
     {
-        public Character [] characters;
+        public List<Character> characters;
 
         public int Gold;
 
@@ -16,6 +16,7 @@ namespace MicroTwenty
         public Party ()
         {
             inventory = new List<InventoryQuantity> ();
+            characters = new List<Character>();
         }
 
         internal void AddInventoryItem (IInventoryDesc desc)
@@ -54,6 +55,12 @@ namespace MicroTwenty
                 }
             }
             return 0;
+        }
+
+        public int AddCharacter (Character c)
+        {
+            characters.Add (c);
+            return characters.Count - 1;
         }
     }
 }

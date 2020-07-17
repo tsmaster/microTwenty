@@ -44,9 +44,8 @@ namespace MicroTwenty
             _partyMenu.SetWindow (1, 6);
             _partyMenu.AddItem ("Character");
             _partyMenu.AddItem ("Cast Spell");
-            _partyMenu.AddItem ("Use Item");
-            _partyMenu.AddItem ("Sing Song");
             _partyMenu.AddItem ("Marching Orders");
+            _partyMenu.AddItem ("Show Inventory");
             _partyMenu.AddItem ("Sleep");
             _partyMenu.AddItem ("Save Game");
             _partyMenu.AddItem ("Exit Game");
@@ -85,11 +84,28 @@ namespace MicroTwenty
                 Color.black);
 
             TextureDrawing.DrawCenteredStringAt (_targetTexture, _fontTexture,
+                string.Format("{0}g", _gameMgr.Party.Gold),
+                _textureWidth / 2, _textureHeight - 30,
+                Color.black);
+
+
+            TextureDrawing.DrawCenteredStringAt (_targetTexture, _fontTexture,
                 "X - eXit",
                 _textureWidth / 2, 20,
                 Color.black);
 
-            _menuMgr.Draw (_targetTexture, _margin * 2, _targetTexture.height - _margin * 8);
+            // draw party grid
+            for (int i = 0; i < _gameMgr.Party.characters.Count; ++i) {
+                var c = _gameMgr.Party.characters [i];
+                var s = string.Format ("{0} {1} {2} {3} {4}", i, c.Name, c.hitPoints, c.manaPoints, c.GetStatusString());
+
+                TextureDrawing.DrawStringAt (_targetTexture, _fontTexture,
+                    s,
+                    _margin, _textureHeight - 40 - 8 * i,
+                    Color.black);
+            }
+
+            _menuMgr.Draw (_targetTexture, _margin * 2, 100);
 
             _targetTexture.Apply ();
         }

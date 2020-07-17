@@ -168,7 +168,7 @@ namespace MicroTwenty
             _menuMgr = new MenuManager (menuBitmap, fontBitmap);
             _mainMenu = new MenuObject ("main menu", menuBitmap, fontBitmap);
             _mainMenu.SetWindow (1, 4);
-            _mainMenu.AddItem ("Party");
+            _mainMenu.AddItem ("Party").SetAction (() => { _gameMgr.EnterBuilding ("Party", BuildingTrigger.BuildingType.PARTY); });
             _mainMenu.AddItem ("Combat").SetWindow (1, 4);
             _mainMenu ["Combat"].AddItem ("Attack");
             _mainMenu ["Combat"].AddItem ("Defend");
@@ -1105,6 +1105,7 @@ namespace MicroTwenty
                 _buildingUi = new EquipmentBuildingUi (name, _gameMgr);
                 break;
             case BuildingTrigger.BuildingType.PARTY:
+                // TODO This doesn't really belong here.
                 _buildingUi = new PartyUi (_gameMgr);
                 break;
             case BuildingTrigger.BuildingType.PAPERDOLL:
