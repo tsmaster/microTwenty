@@ -9,6 +9,8 @@
 /[Bb]uilds/
 /[Ll]ogs/
 /[Uu]ser[Ss]ettings/
+# this holds credentials we don't want in GitHub
+/Assets/Google Sheets For Unity/Utils/ConnectionData.asset
 
 # MemoryCaptures can get excessive in size.
 # They also could contain extremely sensitive data
