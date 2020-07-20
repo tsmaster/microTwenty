@@ -9,7 +9,7 @@ namespace MicroTwenty
 {
     public class GameMgr
     {
-        private MapManager mapManager;
+        private MapManager _mapManager;
 
         private WeaponDataManager _weaponDataManager;
         private ArmorDataManager _armorDataManager;
@@ -19,9 +19,15 @@ namespace MicroTwenty
 
         public Party Party {get; set;}
 
+        internal void ShowPaperDoll (Character character)
+        {
+            EnterBuilding ("Paper Doll", BuildingTrigger.BuildingType.PAPERDOLL);
+            _mapManager.SetPaperDollCharacter (character);
+        }
+
         public GameMgr (MapManager mapManager)
         {
-            this.mapManager = mapManager;
+            this._mapManager = mapManager;
             _inventoryDataManager = new InventoryDataManager ();
             _weaponDataManager = new WeaponDataManager (_inventoryDataManager);
             _armorDataManager = new ArmorDataManager (_inventoryDataManager);
@@ -57,17 +63,17 @@ namespace MicroTwenty
 
         internal void EnterBuilding (String name, BuildingTrigger.BuildingType buildingType)
         {
-            mapManager.EnterBuilding (name, buildingType);
+            _mapManager.EnterBuilding (name, buildingType);
         }
 
         internal void ExitBuilding ()
         {
-            mapManager.ExitBuilding ();
+            _mapManager.ExitBuilding ();
         }
 
         internal void TeleportPlayer (string destMapName, HexCoord destMapCoord)
         {
-            mapManager.TeleportPlayer (destMapName, destMapCoord);
+            _mapManager.TeleportPlayer (destMapName, destMapCoord);
         }
 
         public WeaponDataManager GetWeaponDataManager ()
@@ -87,7 +93,7 @@ namespace MicroTwenty
 
         internal MapManager GetMapManager ()
         {
-            return mapManager;
+            return _mapManager;
         }
 
         internal void AddCommand (Command command)
@@ -98,7 +104,7 @@ namespace MicroTwenty
 
         internal void EnterCombat (string destMapName)
         {
-            mapManager.EnterCombat (destMapName);
+            _mapManager.EnterCombat (destMapName);
         }
 
         internal void Update (float deltaSeconds)

@@ -97,7 +97,7 @@ namespace MicroTwenty
             foreach (IInventoryDesc item in _inventoryItems) {
                 string invCode = item.GetInventoryCode ();
                 string invName = item.GetName ();
-                Debug.LogFormat ("adding {0} {1} {2} to menu", item, invCode, invName);
+                //Debug.LogFormat ("adding {0} {1} {2} to menu", item, invCode, invName);
                 if ((invName != null) &&
                     (invName.Length > 0)) {
                     var quant = _inventoryQuantities [invCode];

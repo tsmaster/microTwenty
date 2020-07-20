@@ -31,8 +31,8 @@ namespace MicroTwenty
         {
             this.Name = name;
             this.hitPoints = hitPoints;
+            equippedItems = new Dictionary<ItemEquipLocation, IInventoryDesc> ();
         }
-
 
         // TODO add status flags, buffs, curses
         public string GetStatusString ()
@@ -42,6 +42,15 @@ namespace MicroTwenty
             } else {
                 return "OK";
             }
+        }
+
+        public void Equip (ItemEquipLocation loc, IInventoryDesc item, GameMgr gameMgr)
+        {
+            IInventoryDesc oldItem = null;
+
+            // TODO unequip old item
+
+            equippedItems [loc] = item;
         }
     }
 }

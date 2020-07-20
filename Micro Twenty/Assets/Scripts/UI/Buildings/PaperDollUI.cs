@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace MicroTwenty
 {
@@ -11,7 +13,11 @@ namespace MicroTwenty
         private int _margin;
         private int _textureWidth;
         private int _textureHeight;
-        private Texture2D _axeTexture;
+        private Texture2D _backgroundTexture;
+        private Character _character;
+        private MenuManager _menuMgr;
+        private MenuObject _charMenu;
+        private MenuObject _equipItemMenu;
 
         public PaperDollUi (GameMgr gameMgr)
         {
@@ -24,7 +30,86 @@ namespace MicroTwenty
             _textureWidth = _targetTexture.width;
             _textureHeight = _targetTexture.height;
 
-            _axeTexture = Resources.Load<Texture2D> ("Sprites/Dialogs/paperdoll");
+            _backgroundTexture = Resources.Load<Texture2D> ("Sprites/Dialogs/paperdoll");
+
+            _character = null;
+
+            var mapManager = _gameMgr.GetMapManager ();
+            var menuBitmap = mapManager.GetMenuBitmap ();
+            var fontBitmap = mapManager.GetFontBitmap ();
+
+            _menuMgr = new MenuManager (menuBitmap, fontBitmap);
+            _charMenu = new MenuObject ("character menu", menuBitmap, fontBitmap);
+            _charMenu.SetWindow (1, 6);
+
+            _charMenu.AddItem ("Stats");
+            _equipItemMenu = _charMenu.AddItem ("Equip Item");
+            _equipItemMenu.SetWindow (1, 4);
+            UpdateEquipItemMenu ();
+
+            _charMenu.AddItem ("Use Item");
+            _charMenu.AddItem ("Play Song");
+            _charMenu.AddItem ("Cast Spell");
+            _charMenu.AddItem ("Exit").SetAction (() => { _gameMgr.ExitBuilding (); });
+
+            _charMenu.Build ();
+
+            _menuMgr.OpenMenu (_charMenu);
+        }
+
+        private void UpdateEquipItemMenu ()
+        {
+            _equipItemMenu.ClearItems ();
+            if (_character == null) {
+                _equipItemMenu.SetEnabled (false);
+                return;
+            }
+            _equipItemMenu.SetEnabled (true);
+
+            var rHandEquipMenu = _equipItemMenu.AddItem ("Right Hand");
+            AddEquipMenu (rHandEquipMenu, Character.ItemEquipLocation.HAND_RIGHT);
+            var lHandEquipMenu = _equipItemMenu.AddItem ("Left Hand");
+            AddEquipMenu (lHandEquipMenu, Character.ItemEquipLocation.HAND_LEFT);
+            var bodyEquipMenu = _equipItemMenu.AddItem ("Body");
+            AddEquipMenu (bodyEquipMenu, Character.ItemEquipLocation.BODY);
+            var headEquipMenu = _equipItemMenu.AddItem ("Head");
+            AddEquipMenu (headEquipMenu, Character.ItemEquipLocation.HEAD);
+            var feetEquipMenu = _equipItemMenu.AddItem ("Feet");
+            AddEquipMenu (feetEquipMenu, Character.ItemEquipLocation.FEET);
+
+            _equipItemMenu.Build ();
+        }
+
+        private void AddEquipMenu (MenuObject locationEquipMenu, Character.ItemEquipLocation loc)
+        {
+            locationEquipMenu.ClearItems ();
+
+            var itemList = GetItemsForLocation (loc);
+            if (itemList.Count == 0) {
+                locationEquipMenu.SetEnabled (false);
+                return;
+            }
+
+            locationEquipMenu.SetWindow (1, 5);
+
+            foreach (var item in itemList) {
+                locationEquipMenu.AddItem (item.GetName ()).SetAction (() => { _character.Equip (loc, item, _gameMgr); });
+            }
+
+            locationEquipMenu.Build ();
+        }
+
+        private List<IInventoryDesc> GetItemsForLocation (Character.ItemEquipLocation loc)
+        {
+            List<IInventoryDesc> items = new List<IInventoryDesc> ();
+
+            foreach (var partyItem in _gameMgr.Party.inventory) {
+                // TODO if item can be equipped at location
+
+                items.Add (partyItem.Item);
+            }
+
+            return items;
         }
 
         public override void Draw ()
@@ -34,11 +119,11 @@ namespace MicroTwenty
                 _textureWidth - 2 * _margin, _textureHeight - 2 * _margin,
                 Color.white, Color.green, true, true);
 
-            TextureDrawing.DrawPartialSprite (_targetTexture, _axeTexture,
+            TextureDrawing.DrawPartialSprite (_targetTexture, _backgroundTexture,
                 2 * _margin,
-                _targetTexture.height - 2 * _margin - _axeTexture.height,
+                _targetTexture.height - 2 * _margin - _backgroundTexture.height,
                 0, 0,
-                _axeTexture.width, _axeTexture.height);
+                _backgroundTexture.width, _backgroundTexture.height);
 
             TextureDrawing.DrawCenteredStringAt (_targetTexture, _fontTexture,
                 _name,
@@ -50,14 +135,56 @@ namespace MicroTwenty
                 _textureWidth / 2, 20,
                 Color.black);
 
+            _menuMgr.Draw (_targetTexture, _margin * 2, 100);
+
             _targetTexture.Apply ();
         }
 
         public override void Update (float deltaSeconds)
         {
+            if (_character == null) {
+                var c = _gameMgr.GetMapManager ().GetCharacterForPaperDoll ();
+                if (c != null) {
+                    SetCharacter (c);
+                }
+            }
+
+            if (Input.GetKeyDown (KeyCode.UpArrow)) {
+                _menuMgr.OnUp ();
+            } else if (Input.GetKeyDown (KeyCode.DownArrow)) {
+                _menuMgr.OnDown ();
+            } else if (Input.GetKeyDown (KeyCode.LeftArrow)) {
+                // show menu
+                _menuMgr.OnLeft ();
+            } else if (Input.GetKeyDown (KeyCode.RightArrow)) {
+                // show menu
+                _menuMgr.OnRight ();
+            } else if ((Input.GetKeyDown (KeyCode.Space)) ||
+                (Input.GetKeyDown (KeyCode.Return)) ||
+                (Input.GetButtonDown ("Submit"))) {
+
+                var result = _menuMgr.OnActivate ();
+                if (result != null) {
+                    var resId = result.GetItemId ();
+                    switch (resId) {
+                    default:
+                        Debug.LogFormat ("got select for resID {0}", resId);
+                        break;
+                    }
+                }
+            }
+
+
             if (Input.GetKeyDown (KeyCode.X)) {
                 _gameMgr.ExitBuilding ();
             }
+        }
+
+        private void SetCharacter (Character c)
+        {
+            _character = c;
+            _name = c.Name;
+            UpdateEquipItemMenu ();
         }
     }
 }

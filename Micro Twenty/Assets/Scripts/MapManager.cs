@@ -120,6 +120,8 @@ namespace MicroTwenty
         public IIntroScreen _introScreen;
         private BuildingUi _buildingUi;
 
+        private Character _selectedCharacterForPaperDoll; //TODO so gross
+
         // Start is called before the first frame update
         void Start ()
         {
@@ -1119,6 +1121,16 @@ namespace MicroTwenty
         public void ExitBuilding ()
         {
             _buildingUi = null;
+        }
+
+        internal void SetPaperDollCharacter (Character character)
+        {
+            _selectedCharacterForPaperDoll = character;
+        }
+
+        internal Character GetCharacterForPaperDoll ()
+        {
+            return _selectedCharacterForPaperDoll;
         }
     }
 }

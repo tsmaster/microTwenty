@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace MicroTwenty
 {
@@ -20,6 +21,7 @@ namespace MicroTwenty
         private Texture2D _partyTexture;
         private MenuManager _menuMgr;
         private MenuObject _partyMenu;
+        private MenuObject _inventoryMenu;
 
         public PartyUi (GameMgr gameMgr)
         {
@@ -34,7 +36,6 @@ namespace MicroTwenty
 
             _partyTexture = Resources.Load<Texture2D> ("Sprites/Dialogs/party");
 
-
             var mapManager = _gameMgr.GetMapManager ();
             var menuBitmap = mapManager.GetMenuBitmap ();
             var fontBitmap = mapManager.GetFontBitmap ();
@@ -42,10 +43,13 @@ namespace MicroTwenty
             _menuMgr = new MenuManager (menuBitmap, fontBitmap);
             _partyMenu = new MenuObject ("party menu", menuBitmap, fontBitmap);
             _partyMenu.SetWindow (1, 6);
-            _partyMenu.AddItem ("Character");
+            var charMenu = _partyMenu.AddItem ("Character");
+            AddPartySubMenu (charMenu, (Character c) => { ShowPaperDoll (c); });
             _partyMenu.AddItem ("Cast Spell");
             _partyMenu.AddItem ("Marching Orders");
-            _partyMenu.AddItem ("Show Inventory");
+            _inventoryMenu = _partyMenu.AddItem ("Show Inventory");
+            _inventoryMenu.SetWindow (1, 5);
+            UpdateInventoryMenu ();
             _partyMenu.AddItem ("Sleep");
             _partyMenu.AddItem ("Save Game");
             _partyMenu.AddItem ("Exit Game");
@@ -55,6 +59,66 @@ namespace MicroTwenty
             _partyMenu.Build ();
 
             _menuMgr.OpenMenu (_partyMenu);
+        }
+
+        private void ShowPaperDoll (Character c)
+        {
+            _gameMgr.ExitBuilding ();
+            //_gameMgr.AddCommand (new ExitBuildingCommand (_gameMgr));
+            _gameMgr.AddCommand (new ShowPaperDollCommand (c, _gameMgr));
+        }
+
+        private void UpdateInventoryMenu ()
+        {
+            _inventoryMenu.ClearItems ();
+
+            if (_gameMgr.Party.inventory.Count == 0) {
+                _inventoryMenu.SetEnabled (false);
+                return;
+            } else {
+                _inventoryMenu.SetEnabled (true);
+            }
+
+            foreach (var invItem in _gameMgr.Party.inventory) {
+                var invCount = invItem.Count;
+                var invCode = invItem.Item.GetInventoryCode ();
+                var invName = invItem.Item.GetName ();
+
+                var itemMenu = _inventoryMenu.AddItem (string.Format ("{0} ({1})", invName, invCount));
+                itemMenu.SetWindow (1, 4);
+                var equipMenuItem = itemMenu.AddItem ("Equip");
+                AddPartySubMenu (equipMenuItem, (Character c) => { ShowCharEquipScreen (c, invItem.Item); });
+                var useMenuItem = itemMenu.AddItem ("Use");
+                AddPartySubMenu (useMenuItem, (Character c) => { UseMenuItem (c, invItem.Item); });
+                itemMenu.AddItem ("Drop").SetAction (() => { DropItem (invItem.Item); });
+            }
+
+            _inventoryMenu.Build ();
+        }
+
+        private void DropItem (IInventoryDesc item)
+        {
+            throw new NotImplementedException ();
+        }
+
+        private void UseMenuItem (Character c, IInventoryDesc item)
+        {
+            throw new NotImplementedException ();
+        }
+
+        private void ShowCharEquipScreen (Character c, IInventoryDesc item)
+        {
+            throw new NotImplementedException ();
+        }
+
+        private void AddPartySubMenu (MenuObject menuItem, Action<Character> p)
+        {
+            menuItem.ClearItems ();
+            menuItem.SetWindow (1, 6);
+            foreach (var character in _gameMgr.Party.characters) {
+                menuItem.AddItem (character.Name).SetAction(() => { p (character); });
+            }
+            menuItem.Build ();
         }
 
         public override void Draw ()
