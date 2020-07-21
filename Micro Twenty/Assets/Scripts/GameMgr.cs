@@ -39,12 +39,23 @@ namespace MicroTwenty
             Party.Gold = 6000;
 
 
-            Character char0 = new Character ("Alex", 10);
-            Character char1 = new Character ("Bob", 10);
-            Character char2 = new Character ("Chad", 10);
-            Character char3 = new Character ("Dora", 10);
-            Character char4 = new Character ("Evy", 10);
-            Character char5 = new Character ("Finn", 10);
+            Character char0 = new Character ("Stan", 10);
+            Character char1 = new Character ("Kim", 10);
+            Character char2 = new Character ("Flexo", 10);
+            Character char3 = new Character ("Mags", 10);
+            Character char4 = new Character ("Torso", 10);
+            Character char5 = new Character ("Belto", 10);
+
+            /*
+            AddUnit ("Stan", t0Starts [0], SpriteId.SPRITE_COMBAT_GUY_1, 0, 3).AddWeapon (WeaponRep.MakeBow ()).AddArmor (ArmorRep.MakeLeatherArmor ());
+            AddUnit ("Kim", t0Starts [1], SpriteId.SPRITE_COMBAT_GUY_2, 0, 3).AddWeapon (WeaponRep.MakeBow ()).AddArmor (ArmorRep.MakeLeatherArmor ());
+            AddUnit ("Flexo", t0Starts [2], SpriteId.SPRITE_COMBAT_GUY_3, 0, 2).AddWeapon (WeaponRep.MakeSword ()).AddArmor (ArmorRep.MakeLeatherArmor ());
+            AddUnit ("Mags", t0Starts [3], SpriteId.SPRITE_COMBAT_GUY_4, 0, 3).
+                AddWeapon (WeaponRep.MakeStaff ()).AddArmor (ArmorRep.MakeClothArmor ()).
+                AddSpell (SpellRep.MakeFireballSpell ()).AddSpell (SpellRep.MakeHealSpell ());
+            AddUnit ("Torso", t0Starts [4], SpriteId.SPRITE_COMBAT_GUY_5, 0, 2).AddWeapon (WeaponRep.MakeSword ()).AddArmor (ArmorRep.MakePlateArmor ());
+            AddUnit ("Belto", t0Starts [5], SpriteId.SPRITE_COMBAT_GUY_6, 0, 2).AddWeapon (WeaponRep.MakeSword ()).AddArmor (ArmorRep.MakeChainArmor ());
+            */
 
             Party.AddCharacter (char0);
             Party.AddCharacter (char1);

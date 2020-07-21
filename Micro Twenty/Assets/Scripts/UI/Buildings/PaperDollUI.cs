@@ -93,7 +93,9 @@ namespace MicroTwenty
             locationEquipMenu.SetWindow (1, 5);
 
             foreach (var item in itemList) {
-                locationEquipMenu.AddItem (item.GetName ()).SetAction (() => { _character.Equip (loc, item, _gameMgr); });
+                locationEquipMenu.AddItem (item.GetName ()).SetAction (() => {
+                    _gameMgr.Party.RemoveInventoryItem (item);
+                    _character.Equip (loc, item, _gameMgr); });
             }
 
             locationEquipMenu.Build ();
@@ -104,12 +106,29 @@ namespace MicroTwenty
             List<IInventoryDesc> items = new List<IInventoryDesc> ();
 
             foreach (var partyItem in _gameMgr.Party.inventory) {
-                // TODO if item can be equipped at location
-
-                items.Add (partyItem.Item);
+                if (CanEquipItemAtLocation (partyItem.Item, loc)) {
+                    items.Add (partyItem.Item);
+                }
             }
 
             return items;
+        }
+
+        private bool CanEquipItemAtLocation (IInventoryDesc item, Character.ItemEquipLocation loc) {
+            switch (loc) {
+            case Character.ItemEquipLocation.BODY:
+                return item.CanEquipBody ();
+            case Character.ItemEquipLocation.HEAD:
+                return item.CanEquipHead ();
+            case Character.ItemEquipLocation.HAND_LEFT:
+            case Character.ItemEquipLocation.HAND_RIGHT:
+                return item.CanEquipHands ();
+            case Character.ItemEquipLocation.FEET:
+                return item.CanEquipFeet ();
+            default:
+                Debug.LogErrorFormat ("unknown loc {0}", loc);
+                return false;
+            }
         }
 
         public override void Draw ()
@@ -129,6 +148,38 @@ namespace MicroTwenty
                 _name,
                 _textureWidth / 2, _textureHeight - 20,
                 Color.black);
+
+            if (_character != null) {
+                TextureDrawing.DrawCenteredStringAt (_targetTexture, _fontTexture,
+                    string.Format ("STR {0}  INT {1}  WIS {2}",
+                        _character.stat_str,
+                        _character.stat_int,
+                        _character.stat_wis),
+                    _textureWidth / 2, _textureHeight - 30,
+                    Color.black);
+                TextureDrawing.DrawCenteredStringAt (_targetTexture, _fontTexture,
+                    string.Format ("DEX {0}  CON {1}  CHA {2}",
+                        _character.stat_dex,
+                        _character.stat_con,
+                        _character.stat_cha),
+                    _textureWidth / 2, _textureHeight - 40,
+                    Color.black);
+                TextureDrawing.DrawCenteredStringAt (_targetTexture, _fontTexture,
+                    string.Format ("AC {0}  HP {1}  MP {2}",
+                        _character.GetArmorClass(),
+                        _character.hitPoints,
+                        _character.manaPoints),
+                    _textureWidth / 2, _textureHeight - 50,
+                    Color.black);
+                TextureDrawing.DrawCenteredStringAt (_targetTexture, _fontTexture,
+                    string.Format ("LVL {0}  EXP {1}  ST {2}",
+                        _character.level,
+                        _character.experiencePoints,
+                        _character.GetStatusString()),
+                    _textureWidth / 2, _textureHeight - 60,
+                    Color.black);
+
+            }
 
             TextureDrawing.DrawCenteredStringAt (_targetTexture, _fontTexture,
                 "X - eXit",

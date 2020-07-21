@@ -39,6 +39,10 @@ namespace MicroTwenty
             foreach (var invQuant in inventory) {
                 if (invQuant.Item.GetInventoryCode () == desc.GetInventoryCode ()) {
                     invQuant.Count -= 1;
+
+                    if (invQuant.Count <= 0) {
+                        inventory.Remove (invQuant);
+                    }
                     return;
                 }
             }

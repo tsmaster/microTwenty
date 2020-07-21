@@ -17,6 +17,37 @@ namespace MicroTwenty
         public string Tags;
         public string Range;
 
+        public bool CanEquipBody ()
+        {
+            return false;
+        }
+
+        public bool CanEquipFeet ()
+        {
+            return false;
+        }
+
+        public bool CanEquipHands ()
+        {
+            return true;
+        }
+
+        public bool CanEquipHead ()
+        {
+            return false;
+        }
+
+        public bool CanUseCombat ()
+        {
+            // TODO what about one-use items, like grenades?
+            return false;
+        }
+
+        public bool CanUseNonCombat ()
+        {
+            return false;
+        }
+
         int IInventoryDesc.GetCost ()
         {
             return Cost;

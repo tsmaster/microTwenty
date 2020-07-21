@@ -7,6 +7,13 @@ namespace MicroTwenty
         string GetInventoryCode ();
         string GetName ();
         int GetCost ();
+
+        bool CanEquipBody ();
+        bool CanEquipHead ();
+        bool CanEquipHands ();
+        bool CanEquipFeet ();
+        bool CanUseNonCombat ();
+        bool CanUseCombat ();
     }
 
     public class InventoryQuantity
