@@ -17,12 +17,15 @@ namespace MicroTwenty
             set { _dismissOnAction = value; }
         }
 
+        public bool CanBackOutOfMenu { get; set; }
+
         public MenuManager (Texture2D menuSprite, Texture2D fontSprite)
         {
             _menuSprite = menuSprite;
             _fontSprite = fontSprite;
 
             _menuStack = new List<MenuObject> ();
+            CanBackOutOfMenu = true;
         }
 
         public void OpenMenu (MenuObject menuObject)
@@ -101,7 +104,8 @@ namespace MicroTwenty
         internal void OnBack ()
         {
             _menuStack.RemoveAt (_menuStack.Count - 1);
-            if (_menuStack.Count == 0) {
+
+            if (CanBackOutOfMenu && (_menuStack.Count == 0)) {
                 CloseMenu ();
             }
         }

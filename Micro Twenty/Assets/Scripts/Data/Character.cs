@@ -26,6 +26,9 @@ namespace MicroTwenty
         public int level;
         public string Class;
 
+        public int currentHitPoints;
+        public int currentManaPoints;
+
         // stats
         public int stat_str;
         public int stat_int;
@@ -34,12 +37,16 @@ namespace MicroTwenty
         public int stat_con;
         public int stat_cha;
 
+        public SpriteId SpriteID { get; set; }
+
+
         public Dictionary<ItemEquipLocation, IInventoryDesc> equippedItems;
 
         public Character (string name, int hitPoints)
         {
             this.Name = name;
             this.hitPoints = hitPoints;
+            this.currentHitPoints = hitPoints;
             equippedItems = new Dictionary<ItemEquipLocation, IInventoryDesc> ();
 
             RollStats ();
@@ -53,20 +60,31 @@ namespace MicroTwenty
             stat_dex = Roll3d6 ();
             stat_con = Roll3d6 ();
             stat_cha = Roll3d6 ();
+
+            int spriteIndex = UnityEngine.Random.Range (0, 6);
+
+            switch (spriteIndex) {
+                case 0: SpriteID = SpriteId.SPRITE_COMBAT_GUY_1; break;
+                case 1: SpriteID = SpriteId.SPRITE_COMBAT_GUY_2; break;
+                case 2: SpriteID = SpriteId.SPRITE_COMBAT_GUY_3; break;
+                case 3: SpriteID = SpriteId.SPRITE_COMBAT_GUY_4; break;
+                case 4: SpriteID = SpriteId.SPRITE_COMBAT_GUY_5; break;
+                case 5: SpriteID = SpriteId.SPRITE_COMBAT_GUY_6; break;
+            }
         }
 
         private int Roll3d6 ()
         {
-            return UnityEngine.Random.Range (0,6) +
+            return UnityEngine.Random.Range (0, 6) +
                 UnityEngine.Random.Range (0, 6) +
                 UnityEngine.Random.Range (0, 6) +
                 3;
-        }       
+        }
 
         // TODO add status flags, buffs, curses
         public string GetStatusString ()
         {
-            if (hitPoints <= 0) {
+            if (currentHitPoints <= 0) {
                 return "DE";
             } else {
                 return "OK";
@@ -85,7 +103,7 @@ namespace MicroTwenty
                 }
             }
 
-            return Mathf.CeilToInt(armorValue);
+            return Mathf.CeilToInt (armorValue);
         }
 
         public void Equip (ItemEquipLocation loc, IInventoryDesc item, GameMgr gameMgr)
@@ -100,6 +118,54 @@ namespace MicroTwenty
             }
 
             equippedItems [loc] = item;
+        }
+
+        public int GetCombatMove ()
+        {
+            // TODO determine from stats
+            return 3;
+        }
+
+        internal List<WeaponRow> GetWeapons ()
+        {
+            List<WeaponRow> weapons = new List<WeaponRow> ();
+
+            foreach (IInventoryDesc equippedItem in equippedItems.Values) {
+                WeaponRow weaponItem = equippedItem as WeaponRow;
+                if (weaponItem != null) {
+                    weapons.Add (weaponItem);
+                }
+            }
+            return weapons;
+        }
+
+        public List<ArmorRow> GetArmors ()
+        {
+            List<ArmorRow> armors = new List<ArmorRow> ();
+
+            foreach (IInventoryDesc equippedItem in equippedItems.Values) {
+                ArmorRow armorItem = equippedItem as ArmorRow;
+                if (armorItem != null) {
+                    armors.Add (armorItem);
+                }
+            }
+            return armors;
+        }
+
+        public List<SpellRep> GetSpells ()
+        {
+            List<SpellRep> spells = new List<SpellRep>();
+            return spells;
+        }
+
+        public void SetCurrentHP (int hp)
+        {
+            currentHitPoints = hp;
+        }
+
+        public void SetCurrentMP (int mp)
+        {
+            currentManaPoints = mp;
         }
     }
 }

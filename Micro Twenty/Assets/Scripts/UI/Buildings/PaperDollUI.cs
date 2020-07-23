@@ -39,6 +39,9 @@ namespace MicroTwenty
             var fontBitmap = mapManager.GetFontBitmap ();
 
             _menuMgr = new MenuManager (menuBitmap, fontBitmap);
+            _menuMgr.DismissOnAction = false;
+            _menuMgr.CanBackOutOfMenu = false;
+
             _charMenu = new MenuObject ("character menu", menuBitmap, fontBitmap);
             _charMenu.SetWindow (1, 6);
 
@@ -165,10 +168,12 @@ namespace MicroTwenty
                     _textureWidth / 2, _textureHeight - 40,
                     Color.black);
                 TextureDrawing.DrawCenteredStringAt (_targetTexture, _fontTexture,
-                    string.Format ("AC {0}  HP {1}  MP {2}",
+                    string.Format ("AC {0}  HP {1}/{2}  MP {3}/{4}",
                         _character.GetArmorClass(),
                         _character.hitPoints,
-                        _character.manaPoints),
+                        _character.currentHitPoints,
+                        _character.manaPoints,
+                        _character.currentManaPoints),
                     _textureWidth / 2, _textureHeight - 50,
                     Color.black);
                 TextureDrawing.DrawCenteredStringAt (_targetTexture, _fontTexture,
@@ -223,10 +228,12 @@ namespace MicroTwenty
                         break;
                     }
                 }
+            } else if (Input.GetKeyDown (KeyCode.Escape)) {
+                _menuMgr.OnBack ();
             }
 
-
             if (Input.GetKeyDown (KeyCode.X)) {
+                // TODO unnecessary?
                 _gameMgr.ExitBuilding ();
             }
         }

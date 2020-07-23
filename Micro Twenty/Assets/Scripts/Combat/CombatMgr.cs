@@ -187,14 +187,39 @@ namespace MicroTwenty
             var t0Starts = HexCoord.GetWithinRangeFromLoc (2, sl0).FindAll (IsLocationWalkable);
             BdgRandom.ShuffleList<HexCoord> (t0Starts);
 
-            AddUnit ("Stan", t0Starts[0], SpriteId.SPRITE_COMBAT_GUY_1, 0, 3).AddWeapon(WeaponRep.MakeBow()).AddArmor(ArmorRep.MakeLeatherArmor());
-            AddUnit ("Kim", t0Starts [1], SpriteId.SPRITE_COMBAT_GUY_2, 0, 3).AddWeapon (WeaponRep.MakeBow ()).AddArmor (ArmorRep.MakeLeatherArmor ());
-            AddUnit ("Flexo", t0Starts [2], SpriteId.SPRITE_COMBAT_GUY_3, 0, 2).AddWeapon (WeaponRep.MakeSword ()).AddArmor (ArmorRep.MakeLeatherArmor ());
-            AddUnit ("Mags", t0Starts [3], SpriteId.SPRITE_COMBAT_GUY_4, 0, 3).
-                AddWeapon (WeaponRep.MakeStaff ()).AddArmor (ArmorRep.MakeClothArmor ()).
-                AddSpell(SpellRep.MakeFireballSpell()).AddSpell(SpellRep.MakeHealSpell());
-            AddUnit ("Torso", t0Starts [4], SpriteId.SPRITE_COMBAT_GUY_5, 0, 2).AddWeapon (WeaponRep.MakeSword ()).AddArmor (ArmorRep.MakePlateArmor ());
-            AddUnit ("Belto", t0Starts [5], SpriteId.SPRITE_COMBAT_GUY_6, 0, 2).AddWeapon (WeaponRep.MakeSword ()).AddArmor (ArmorRep.MakeChainArmor ());
+            if (false) {
+                /* hard coded units
+
+                AddUnit ("Stan", t0Starts[0], SpriteId.SPRITE_COMBAT_GUY_1, 0, 3).AddWeapon(WeaponRep.MakeBow()).AddArmor(ArmorRep.MakeLeatherArmor());
+                AddUnit ("Kim", t0Starts [1], SpriteId.SPRITE_COMBAT_GUY_2, 0, 3).AddWeapon (WeaponRep.MakeBow ()).AddArmor (ArmorRep.MakeLeatherArmor ());
+                AddUnit ("Flexo", t0Starts [2], SpriteId.SPRITE_COMBAT_GUY_3, 0, 2).AddWeapon (WeaponRep.MakeSword ()).AddArmor (ArmorRep.MakeLeatherArmor ());
+                AddUnit ("Mags", t0Starts [3], SpriteId.SPRITE_COMBAT_GUY_4, 0, 3).
+                    AddWeapon (WeaponRep.MakeStaff ()).AddArmor (ArmorRep.MakeClothArmor ()).
+                    AddSpell(SpellRep.MakeFireballSpell()).AddSpell(SpellRep.MakeHealSpell());
+                AddUnit ("Torso", t0Starts [4], SpriteId.SPRITE_COMBAT_GUY_5, 0, 2).AddWeapon (WeaponRep.MakeSword ()).AddArmor (ArmorRep.MakePlateArmor ());
+                AddUnit ("Belto", t0Starts [5], SpriteId.SPRITE_COMBAT_GUY_6, 0, 2).AddWeapon (WeaponRep.MakeSword ()).AddArmor (ArmorRep.MakeChainArmor ());
+
+                */
+            } else {
+                for (int ci = 0; ci < _gameMgr.Party.characters.Count; ++ci) {
+                    var c = _gameMgr.Party.characters [ci];
+
+                    var u = AddUnit (c.Name, t0Starts [ci], c.SpriteID, 0, c.GetCombatMove());
+
+                    // TODO is this necessary? Should I just be using the characters directly?
+                    foreach (var w in c.GetWeapons ()) {
+                        u.AddWeapon (WeaponRep.FromWeaponRow (w));
+                    }
+
+                    foreach (var a in c.GetArmors ()) {
+                        u.AddArmor (ArmorRep.FromArmorRow (a));
+                    }
+
+                    foreach (var s in c.GetSpells ()) {
+                        u.AddSpell (s);
+                    }
+                }
+            }
 
             var t1Starts = HexCoord.GetWithinRangeFromLoc (2, sl1).FindAll (IsLocationWalkable);
             BdgRandom.ShuffleList<HexCoord> (t1Starts);
@@ -211,16 +236,16 @@ namespace MicroTwenty
 
             switch (monsterGenerationStrategy) {
             case 0:
-                AddUnit ("Snake", t1Starts [0], SpriteId.SPRITE_COMBAT_SNAKE, 1, 3).AddWeapon (WeaponRep.MakeBiteWeapon ());
-                AddUnit ("Dog", t1Starts [1], SpriteId.SPRITE_COMBAT_DOG, 1, 3).AddWeapon (WeaponRep.MakeBiteWeapon ());
-                AddUnit ("Ratman", t1Starts [2], SpriteId.SPRITE_COMBAT_RAT_MAN, 1, 3).AddWeapon (WeaponRep.MakeSword ());
-                AddUnit ("Crab", t1Starts [3], SpriteId.SPRITE_COMBAT_CRAB, 1, 2).AddWeapon (WeaponRep.MakeBiteWeapon ());
+                AddUnit ("Snake", t1Starts [0], SpriteId.SPRITE_COMBAT_SNAKE, 1, 3).AddWeapon (WeaponRep.MakeBiteWeapon ()).AddMoneyDrop(1, 10, 1);
+                AddUnit ("Dog", t1Starts [1], SpriteId.SPRITE_COMBAT_DOG, 1, 3).AddWeapon (WeaponRep.MakeBiteWeapon ()).AddMoneyDrop (1, 10, 1);
+                AddUnit ("Ratman", t1Starts [2], SpriteId.SPRITE_COMBAT_RAT_MAN, 1, 3).AddWeapon (WeaponRep.MakeSword ()).AddLootItemStr("DAGGER").AddMoneyDrop (1, 10, 10);
+                AddUnit ("Crab", t1Starts [3], SpriteId.SPRITE_COMBAT_CRAB, 1, 2).AddWeapon (WeaponRep.MakeBiteWeapon ()).AddMoneyDrop (1, 10, 1);
                 AddUnit ("Ghost", t1Starts [4], SpriteId.SPRITE_COMBAT_GHOST, 1, 2).AddWeapon (WeaponRep.MakePsiWeapon ());
-                AddUnit ("Djinn", t1Starts [5], SpriteId.SPRITE_COMBAT_DJINN, 1, 2).AddWeapon (WeaponRep.MakePsiWeapon ());
-                AddUnit ("Cat", t1Starts [6], SpriteId.SPRITE_COMBAT_CAT, 1, 3).AddWeapon (WeaponRep.MakeBiteWeapon ());
-                AddUnit ("Skeleton", t1Starts [7], SpriteId.SPRITE_COMBAT_SKELETON, 1, 3).AddWeapon (WeaponRep.MakeSword ());
-                AddUnit ("Skeleton Archer", t1Starts [8], SpriteId.SPRITE_COMBAT_SKELETON_ARCHER, 1, 3).AddWeapon (WeaponRep.MakeBow ());
-                AddUnit ("Staff", t1Starts [9], SpriteId.SPRITE_COMBAT_STAFF, 1, 3).AddWeapon (WeaponRep.MakeStaff ());
+                AddUnit ("Djinn", t1Starts [5], SpriteId.SPRITE_COMBAT_DJINN, 1, 2).AddWeapon (WeaponRep.MakePsiWeapon ()).AddMoneyDrop (4, 10, 100);
+                AddUnit ("Cat", t1Starts [6], SpriteId.SPRITE_COMBAT_CAT, 1, 3).AddWeapon (WeaponRep.MakeBiteWeapon ()).AddMoneyDrop (1, 10, 1);
+                AddUnit ("Skeleton", t1Starts [7], SpriteId.SPRITE_COMBAT_SKELETON, 1, 3).AddWeapon (WeaponRep.MakeSword ()).AddLootItemStr ("SW").AddMoneyDrop (1, 10, 10);
+                AddUnit ("Skeleton Archer", t1Starts [8], SpriteId.SPRITE_COMBAT_SKELETON_ARCHER, 1, 3).AddWeapon (WeaponRep.MakeBow ()).AddLootItemStr ("BOW").AddMoneyDrop (2, 10, 10);
+                AddUnit ("Staff", t1Starts [9], SpriteId.SPRITE_COMBAT_STAFF, 1, 3).AddWeapon (WeaponRep.MakeStaff ()).AddLootItemStr ("STAFF").AddMoneyDrop (2, 10, 10);
                 AddUnit ("Bug", t1Starts [10], SpriteId.SPRITE_COMBAT_BUG, 1, 3).AddWeapon (WeaponRep.MakeBiteWeapon ());
                 break;
             case 1:
@@ -231,22 +256,20 @@ namespace MicroTwenty
                 AddUnit ("Snake", t1Starts [4], SpriteId.SPRITE_COMBAT_SNAKE, 1, 3).AddWeapon (WeaponRep.MakeBiteWeapon ());
                 break;
             case 2:
-                AddUnit ("Skeleton", t1Starts [0], SpriteId.SPRITE_COMBAT_SKELETON, 1, 3).AddWeapon (WeaponRep.MakeSword ());
-                AddUnit ("Skeleton", t1Starts [1], SpriteId.SPRITE_COMBAT_SKELETON, 1, 3).AddWeapon (WeaponRep.MakeSword ());
-                AddUnit ("Skeleton", t1Starts [2], SpriteId.SPRITE_COMBAT_SKELETON, 1, 3).AddWeapon (WeaponRep.MakeSword ());
-                AddUnit ("Skeleton Archer", t1Starts [3], SpriteId.SPRITE_COMBAT_SKELETON_ARCHER, 1, 3).AddWeapon (WeaponRep.MakeBow ());
-                AddUnit ("Skeleton Archer", t1Starts [4], SpriteId.SPRITE_COMBAT_SKELETON_ARCHER, 1, 3).AddWeapon (WeaponRep.MakeBow ());
-                AddUnit ("Skeleton Archer", t1Starts [5], SpriteId.SPRITE_COMBAT_SKELETON_ARCHER, 1, 3).AddWeapon (WeaponRep.MakeBow ());
+                AddUnit ("Skeleton", t1Starts [0], SpriteId.SPRITE_COMBAT_SKELETON, 1, 3).AddWeapon (WeaponRep.MakeSword ()).AddLootItemStr ("SW").AddMoneyDrop (1, 10, 10);
+                AddUnit ("Skeleton", t1Starts [1], SpriteId.SPRITE_COMBAT_SKELETON, 1, 3).AddWeapon (WeaponRep.MakeSword ()).AddLootItemStr ("SW").AddMoneyDrop (1, 10, 10);
+                AddUnit ("Skeleton", t1Starts [2], SpriteId.SPRITE_COMBAT_SKELETON, 1, 3).AddWeapon (WeaponRep.MakeSword ()).AddLootItemStr ("SW").AddMoneyDrop (1, 10, 10);
+                AddUnit ("Skeleton Archer", t1Starts [3], SpriteId.SPRITE_COMBAT_SKELETON_ARCHER, 1, 3).AddWeapon (WeaponRep.MakeBow ()).AddLootItemStr ("BOW").AddMoneyDrop (2, 10, 10);
+                AddUnit ("Skeleton Archer", t1Starts [4], SpriteId.SPRITE_COMBAT_SKELETON_ARCHER, 1, 3).AddWeapon (WeaponRep.MakeBow ()).AddLootItemStr ("BOW").AddMoneyDrop (1, 10, 10);
+                AddUnit ("Skeleton Archer", t1Starts [5], SpriteId.SPRITE_COMBAT_SKELETON_ARCHER, 1, 3).AddWeapon (WeaponRep.MakeBow ()).AddLootItemStr ("BOW").AddMoneyDrop (1, 10, 10);
                 break;
             case 3:
-                AddUnit ("Ratman", t1Starts [0], SpriteId.SPRITE_COMBAT_RAT_MAN, 1, 3).AddWeapon (WeaponRep.MakeSword ());
-                AddUnit ("Ratman", t1Starts [1], SpriteId.SPRITE_COMBAT_RAT_MAN, 1, 3).AddWeapon (WeaponRep.MakeSword ());
-                AddUnit ("Ratman", t1Starts [2], SpriteId.SPRITE_COMBAT_RAT_MAN, 1, 3).AddWeapon (WeaponRep.MakeSword ());
-                AddUnit ("Staff", t1Starts [3], SpriteId.SPRITE_COMBAT_STAFF, 1, 3).AddWeapon (WeaponRep.MakeStaff ()).AddSpell (SpellRep.MakeFireballSpell ()).AddSpell (SpellRep.MakeHealSpell ());
-                AddUnit ("Staff", t1Starts [4], SpriteId.SPRITE_COMBAT_STAFF, 1, 3).AddWeapon (WeaponRep.MakeStaff ()).AddSpell(SpellRep.MakeFireballSpell()).AddSpell(SpellRep.MakeHealSpell());
+                AddUnit ("Ratman", t1Starts [0], SpriteId.SPRITE_COMBAT_RAT_MAN, 1, 3).AddWeapon (WeaponRep.MakeSword ()).AddLootItemStr ("SW").AddMoneyDrop (1, 10, 10);
+                AddUnit ("Ratman", t1Starts [1], SpriteId.SPRITE_COMBAT_RAT_MAN, 1, 3).AddWeapon (WeaponRep.MakeSword ()).AddLootItemStr ("SW").AddMoneyDrop (1, 10, 10);
+                AddUnit ("Ratman", t1Starts [2], SpriteId.SPRITE_COMBAT_RAT_MAN, 1, 3).AddWeapon (WeaponRep.MakeSword ()).AddLootItemStr ("SW").AddMoneyDrop (1, 10, 10);
+                AddUnit ("Staff", t1Starts [3], SpriteId.SPRITE_COMBAT_STAFF, 1, 3).AddWeapon (WeaponRep.MakeStaff ()).AddSpell (SpellRep.MakeFireballSpell ()).AddSpell (SpellRep.MakeHealSpell ()).AddLootItemStr ("STAFF").AddMoneyDrop (2, 10, 10);
+                AddUnit ("Staff", t1Starts [4], SpriteId.SPRITE_COMBAT_STAFF, 1, 3).AddWeapon (WeaponRep.MakeStaff ()).AddSpell (SpellRep.MakeFireballSpell ()).AddSpell (SpellRep.MakeHealSpell ()).AddLootItemStr ("STAFF").AddMoneyDrop (2, 10, 10);
                 break;
-
-
             }
 
             BdgRandom.ShuffleList (units);
@@ -307,6 +330,7 @@ namespace MicroTwenty
             _postBattleClock = 0.0f;
         }
 
+        // TODO move to string util
         private List<string> WordWrap (string msg, int lineLength)
         {
             var outList = new List<string> ();
@@ -353,7 +377,7 @@ namespace MicroTwenty
             if (aliveTeams.Count == 0) {
                 UnityEngine.Debug.Log ("Everyone Dead");
                 _postCombatString = "Everyone has died, Hamlet.";
-                _combatPhase = CombatPhase.POST_COMBAT;
+                FinalizeCombat ();
                 return;
             } else if (aliveTeams.Count == 1) {
                 UnityEngine.Debug.LogFormat ("Team {0} wins", aliveTeams [0]);
@@ -362,7 +386,7 @@ namespace MicroTwenty
                 } else {
                     _postCombatString = "You have been defeated";
                 }
-                _combatPhase = CombatPhase.POST_COMBAT;
+                FinalizeCombat ();
                 _winTally [aliveTeams [0]]++;
                 return;
             }
@@ -415,6 +439,68 @@ namespace MicroTwenty
                     _currentOrder = null;
                 }
             }
+        }
+
+        private void FinalizeCombat ()
+        {
+            // write out results to non-combat structures here
+            _combatPhase = CombatPhase.POST_COMBAT;
+
+            for (int ci = 0; ci < _gameMgr.Party.characters.Count; ++ci) {
+                var partyChar = _gameMgr.Party.characters [ci];
+                var combatChar = FindCombatChar (partyChar);
+                if (combatChar != null) {
+                    partyChar.SetCurrentHP (combatChar.currentHP);
+                    partyChar.SetCurrentMP (combatChar.currentMP);
+                }
+            }
+
+            int moneyTotal = 0;
+            List<IInventoryDesc> lootItems = new List<IInventoryDesc> ();
+
+            var invDataMgr = _gameMgr.GetInventoryDataManager ();
+
+            foreach (var unit in units) {
+                if (unit.GetTeamID () == 0) {
+                    // party member, skip
+                    continue;
+                }
+                if (unit.IsAlive ()) {
+                    // unit escaped?
+                    continue;
+                }
+                Debug.LogFormat ("Generating loot for {0}", unit.unitName);
+
+                moneyTotal += unit.GetMoneyLoot ();
+                foreach (var lootStr in unit.GetLootStrings ()) {
+                    var item = invDataMgr.GetByCode (lootStr);
+                    if (item != null) {
+                        lootItems.Add (item);
+                    }
+                }
+            }
+
+            // TODO display this to player
+
+            Debug.LogFormat ("The party earns {0} gold", moneyTotal);
+            foreach (IInventoryDesc item in lootItems) {
+                Debug.LogFormat ("The party finds a {0}", item.GetName ());
+            }
+
+            _gameMgr.Party.Gold += moneyTotal;
+            foreach (var lootItem in lootItems) {
+                _gameMgr.Party.AddInventoryItem (lootItem);
+            }
+        }
+
+        private CombatUnit FindCombatChar (Character nonCombatChar)
+        {
+            foreach (var unit in units) {
+                if (unit.Character == nonCombatChar) {
+                    return unit;
+                }
+            }
+            return null;
         }
 
         private void PopulateCombatMenu (int nextUnitIndex)
@@ -488,6 +574,7 @@ namespace MicroTwenty
             }
         }
 
+        // TODO should not be able to dismiss this menu
         private void UpdateCombatMenu ()
         {
             // TODO this doesn't seem like a thing we want to rewrite each place we use a menu

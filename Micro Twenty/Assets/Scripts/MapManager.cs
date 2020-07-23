@@ -251,6 +251,7 @@ namespace MicroTwenty
             _mainMenu ["Cheat"] ["Teleport"] ["rat isl"].SetItemId (3003);
             _mainMenu ["Cheat"] ["FUNDS"].SetItemId (102);
             _mainMenu ["Cheat"] ["Money=10"].SetItemId (103);
+            _mainMenu ["Cheat"] ["Equip Party"].SetAction (EquipPartyCheat);
             _mainMenu ["Save/Load"].SetWindow (1, 2);
             _mainMenu ["Save/Load"] ["Load"].SetItemId (100);
             _mainMenu ["Save/Load"] ["Save"].SetItemId (101);
@@ -259,6 +260,22 @@ namespace MicroTwenty
             _mainMenu.Build ();
 
             ShowScreen (ScreenId.BigDiceGamesScreen);
+        }
+
+        private void EquipPartyCheat ()
+        {
+            var invMgr = _gameMgr.GetInventoryDataManager ();
+            var shield = invMgr.GetByCode ("SHIELD");
+            var helm = invMgr.GetByCode ("HELM");
+            var chain = invMgr.GetByCode ("CHAIN");
+            var sword = invMgr.GetByCode ("SW");
+
+            foreach (var c in _gameMgr.Party.characters) {
+                c.Equip (Character.ItemEquipLocation.HAND_RIGHT, sword, _gameMgr);
+                c.Equip (Character.ItemEquipLocation.HAND_LEFT, shield, _gameMgr);
+                c.Equip (Character.ItemEquipLocation.HEAD, helm, _gameMgr);
+                c.Equip (Character.ItemEquipLocation.BODY, chain, _gameMgr);
+            }
         }
 
         internal int GetUnitCount () => _combatMgr.GetUnitCount ();

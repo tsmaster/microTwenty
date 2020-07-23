@@ -77,6 +77,8 @@ namespace MicroTwenty
             var fontBitmap = _gameMgr.GetMapManager ().GetFontBitmap ();
             _menuMgr = new MenuManager (menuBitmap, fontBitmap);
             _menuMgr.DismissOnAction = false;
+            _menuMgr.CanBackOutOfMenu = false;
+
             _storeMenu = new MenuObject ("TODO store menu", menuBitmap, fontBitmap);
             _storeMenu.SetWindow (1, 4);
             _buyItemsMenu = _storeMenu.AddItem ("Buy Items");
@@ -294,7 +296,6 @@ namespace MicroTwenty
             }
             if ((Input.GetKeyDown (KeyCode.Escape)) ||
                 (Input.GetButtonDown ("Cancel"))) {
-                // TODO guard against exiting menu
                 _menuMgr.OnBack ();
             }
 

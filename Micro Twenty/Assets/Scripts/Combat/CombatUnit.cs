@@ -16,6 +16,10 @@ namespace MicroTwenty
         public int lastTurnMoved;
         public WeaponRep weapon;
         public ArmorRep armor;
+        public int lootMoneyNumDice;
+        public int lootMoneyDiceSides;
+        public int lootMoneyMultiplier;
+        public List<string> lootItemStrings;
 
         public CombatantSprite _sprite;
 
@@ -23,6 +27,7 @@ namespace MicroTwenty
 
         public List<SpellRep> Spells;
 
+        public Character Character { get; internal set; }
 
         public CombatUnit (string unitName, HexCoord hexCoord, int teamIndex, CombatantSprite sprite, int maxMove)
         {
@@ -36,6 +41,7 @@ namespace MicroTwenty
             this.armor = new ArmorClothRep ();
             this.maxMove = maxMove;
             this.Spells = new List<SpellRep> ();
+            this.lootItemStrings = new List<string> ();
         }
 
         public HexCoord GetHexCoord ()
@@ -95,6 +101,12 @@ namespace MicroTwenty
             return this;
         }
 
+        public CombatUnit AddLootItemStr (string s)
+        {
+            lootItemStrings.Add (s);
+            return this;
+        }
+
         public CombatUnit AddArmor (ArmorRep ar)
         {
             armor = ar;
@@ -105,6 +117,29 @@ namespace MicroTwenty
         {
             Spells.Add (sr);
             return this;
+        }
+
+        public CombatUnit AddMoneyDrop (int numDice, int diceSides, int mult)
+        {
+            this.lootMoneyNumDice = numDice;
+            this.lootMoneyDiceSides = diceSides;
+            this.lootMoneyMultiplier = mult;
+
+            return this;
+        }
+
+        public int GetMoneyLoot ()
+        {
+            var money = 0;
+            for (int i = 0; i < lootMoneyNumDice; ++i) {
+                money += UnityEngine.Random.Range (1, lootMoneyDiceSides + 1);
+            }
+            return money * lootMoneyMultiplier;
+        }
+
+        internal List<string> GetLootStrings ()
+        {
+            return lootItemStrings;
         }
     }
 }

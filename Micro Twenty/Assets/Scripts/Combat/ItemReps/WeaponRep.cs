@@ -75,5 +75,10 @@ namespace MicroTwenty
         {
             return new WeaponRep ("Psi", 1, 4, 0);
         }
+
+        public static WeaponRep FromWeaponRow (WeaponRow w)
+        {
+            return new WeaponRep (w.Name, w.numDice, w.diceSides, w.dmgMod);
+        }
     }
 }

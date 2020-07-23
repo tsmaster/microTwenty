@@ -42,5 +42,10 @@ namespace MicroTwenty
         {
             return new ArmorRep ("Platemail", 3, 0.3f);
         }
+
+        internal static ArmorRep FromArmorRow (ArmorRow a)
+        {
+            return new ArmorRep (a.Name, a.DR, a.THR);
+        }
     }
 }
