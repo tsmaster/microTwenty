@@ -103,9 +103,14 @@ namespace MicroTwenty
 
         internal void OnBack ()
         {
+            if ((!CanBackOutOfMenu) && (_menuStack.Count == 1)) {
+                // bonk, no you can't back out of this menu.
+                return;
+            }
+
             _menuStack.RemoveAt (_menuStack.Count - 1);
 
-            if (CanBackOutOfMenu && (_menuStack.Count == 0)) {
+            if (_menuStack.Count == 0) {
                 CloseMenu ();
             }
         }
